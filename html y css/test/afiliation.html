@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afiliación de Proveedor – SiConozco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+</head>
+<body>
+
+<nav>
+  <a href="siconozco-html.html" class="logo">
+    <div class="logo-icon"><img src="SCpng.png" alt="logo"></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="siconozco-html.html">Inicio</a></li>
+    <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
+    <li><a href="afiliacion.html">Publicar servicio</a></li>
+    <li><a href="contacto.html" class="btn-contact">contacto</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="toggleMenu()">✕</button>
+  <a href="siconozco-html.html" onclick="toggleMenu()">Inicio</a>
+  <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
+  <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
+</div>
+
+<div class="afil-hero">
+  <h1>Únete como Proveedor</h1>
+  <p>Registra tu negocio y empieza a recibir clientes a través de nuestra plataforma</p>
+</div>
+
+<div class="afil-container">
+  <div class="afil-card">
+    <div id="formContent">
+
+      <p class="afil-section-title">Información personal</p>
+
+      <div class="afil-group">
+        <label for="aNombre">Nombre completo <span>*</span></label>
+        <input type="text" id="aNombre" placeholder="Tu nombre completo">
+        <span class="afil-error-msg" id="errNombre">Por favor ingresa tu nombre</span>
+      </div>
+
+      <div class="afil-row">
+        <div class="afil-group">
+          <label for="aTel">Teléfono <span>*</span></label>
+          <input type="tel" id="aTel" placeholder="Ej. 844 123 4567">
+          <span class="afil-error-msg" id="errTel">Ingresa tu teléfono</span>
+        </div>
+        <div class="afil-group">
+          <label for="aEmail">Email <span>*</span></label>
+          <input type="email" id="aEmail" placeholder="correo@ejemplo.com">
+          <span class="afil-error-msg" id="errEmail">Ingresa un email válido</span>
+        </div>
+      </div>
+
+      <div class="afil-group">
+        <label for="aDireccion">Dirección <span>*</span></label>
+        <input type="text" id="aDireccion" placeholder="Calle, colonia, ciudad">
+        <span class="afil-error-msg" id="errDireccion">Ingresa tu dirección</span>
+      </div>
+
+      <div class="afil-divider"></div>
+      <p class="afil-section-title">Información profesional</p>
+
+      <div class="afil-row">
+        <div class="afil-group">
+          <label for="aProfesion">Profesión <span>*</span></label>
+          <select id="aProfesion">
+            <option value="" disabled selected>Selecciona una profesión</option>
+            <option value="electricista">Electricista</option>
+            <option value="plomero">Plomero</option>
+            <option value="albanil">Albañil</option>
+            <option value="carpintero">Carpintero</option>
+            <option value="pintor">Pintor</option>
+            <option value="herrero">Herrero</option>
+            <option value="vidriero">Vidriero</option>
+            <option value="jardinero">Jardinero</option>
+            <option value="soldador">Soldador</option>
+            <option value="mecanico">Mecánico</option>
+            <option value="otro">Otro</option>
+          </select>
+          <span class="afil-error-msg" id="errProfesion">Selecciona tu profesión</span>
+        </div>
+        <div class="afil-group">
+          <label for="aEspecialidad">Especialidad <span>*</span></label>
+          <input type="text" id="aEspecialidad" placeholder="Ej. Instalaciones eléctricas">
+          <span class="afil-error-msg" id="errEspecialidad">Ingresa tu especialidad</span>
+        </div>
+      </div>
+
+      <div class="afil-group">
+        <label for="aDescripcion">Descripción del negocio <span>*</span></label>
+        <textarea id="aDescripcion" placeholder="Cuéntanos sobre tu experiencia, servicios que ofreces, años trabajando..."></textarea>
+        <span class="afil-error-msg" id="errDescripcion">Agrega una descripción</span>
+      </div>
+
+      <div class="afil-divider"></div>
+      <p class="afil-section-title">Fotografías de tu trabajo</p>
+
+      <div class="fotos-grid" id="fotosGrid">
+        <div class="foto-slot" id="slot0">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 0)">
+          <div class="foto-placeholder"><span>📷</span><p>Foto 1<br><small style="font-weight:400">(requerida)</small></p></div>
+          <img id="preview0" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(0)">✕</button>
+        </div>
+        <div class="foto-slot" id="slot1">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 1)">
+          <div class="foto-placeholder"><span>📷</span><p>Foto 2<br><small style="font-weight:400">(requerida)</small></p></div>
+          <img id="preview1" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(1)">✕</button>
+        </div>
+        <div class="foto-slot" id="slot2">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 2)">
+          <div class="foto-placeholder"><span>📷</span><p>Foto 3<br><small style="font-weight:400">(requerida)</small></p></div>
+          <img id="preview2" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(2)">✕</button>
+        </div>
+        <div class="foto-slot" id="slot3">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 3)">
+          <div class="foto-placeholder"><span>➕</span><p>Foto 4<br><small style="font-weight:400">(opcional)</small></p></div>
+          <img id="preview3" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(3)">✕</button>
+        </div>
+        <div class="foto-slot" id="slot4">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 4)">
+          <div class="foto-placeholder"><span>➕</span><p>Foto 5<br><small style="font-weight:400">(opcional)</small></p></div>
+          <img id="preview4" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(4)">✕</button>
+        </div>
+        <div class="foto-slot" id="slot5">
+          <input type="file" accept="image/*" onchange="cargarFoto(this, 5)">
+          <div class="foto-placeholder"><span>➕</span><p>Foto 6<br><small style="font-weight:400">(opcional)</small></p></div>
+          <img id="preview5" src="" alt="">
+          <button type="button" class="foto-remove" onclick="quitarFoto(5)">✕</button>
+        </div>
+      </div>
+      <p class="fotos-nota">📌 Mínimo 3 fotos requeridas. Formatos: JPG, PNG, WEBP.</p>
+      <p class="fotos-error" id="errFotos">Sube al menos 3 fotografías de tu trabajo</p>
+
+      <div class="afil-divider"></div>
+
+      <!-- TÉRMINOS -->
+      <div class="terms-check-area" id="termsCheckArea" onclick="toggleCheck()">
+        <input type="checkbox" id="aceptaTerminos" readonly>
+        <label for="aceptaTerminos">
+          He leído y acepto los <a href="#" onclick="abrirTerminos(event)">Términos y Condiciones</a> de SiConozco, incluyendo la comisión del <strong>13%</strong> por cada servicio contratado a través de la plataforma.
+        </label>
+      </div>
+      <p class="terms-err" id="errTerminos">Debes leer y aceptar los términos y condiciones</p>
+
+      <button class="afil-submit" onclick="enviarAfiliacion()">Enviar solicitud de afiliación</button>
+
+    </div>
+
+    <div class="afil-ok" id="afilOk">
+      <span>🎉</span>
+      <h2>¡Solicitud recibida!</h2>
+      <p>Gracias por registrarte. Revisaremos tu información y nos pondremos en contacto contigo en un plazo de 24 a 48 horas para confirmar tu afiliación.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TÉRMINOS -->
+<div class="terms-modal-overlay" id="termsModal">
+  <div class="terms-modal-box">
+    <div class="terms-modal-header">
+      <h3>📄 Términos y Condiciones</h3>
+      <button class="modal-close" onclick="cerrarTerminos()">✕</button>
+    </div>
+    <div class="terms-modal-body">
+      <h4>1. Acuerdo general</h4>
+      <p>Al registrarte como proveedor en SiConozco, aceptas cumplir con los presentes Términos y Condiciones. SiConozco actúa como intermediario entre clientes y proveedores de servicios. No somos empleadores ni contratistas directos.</p>
+
+      <h4>2. Comisión por servicio</h4>
+      <div class="terms-modal-highlight">
+        💰 SiConozco cobra una comisión del 13% sobre el valor total de cada servicio contratado a través de la plataforma.
+      </div>
+      <p>Esta comisión aplica a todos los trabajos originados mediante solicitudes recibidas a través de SiConozco. El proveedor se compromete a transferir el 13% dentro de los 5 días hábiles posteriores a haber cobrado el servicio.</p>
+
+      <h4>3. Obligaciones del proveedor</h4>
+      <ul>
+        <li>Proporcionar información veraz y actualizada al momento del registro.</li>
+        <li>Brindar el servicio con profesionalismo, puntualidad y calidad.</li>
+        <li>Notificar a SiConozco cuando un servicio sea completado y el monto cobrado.</li>
+        <li>Pagar la comisión acordada en tiempo y forma.</li>
+        <li>No contactar directamente a clientes originados por SiConozco para evadir la comisión.</li>
+        <li>Mantener una calificación mínima de 3.5 estrellas para continuar en la plataforma.</li>
+      </ul>
+
+      <h4>4. Exclusividad y captación de clientes</h4>
+      <p>Queda prohibido que el proveedor redireccione a clientes captados a través de SiConozco hacia canales directos con el objetivo de evadir la comisión. En caso de detectarse esta práctica, SiConozco se reserva el derecho de dar de baja al proveedor de inmediato.</p>
+
+      <h4>5. Baja de la plataforma</h4>
+      <p>SiConozco puede dar de baja a proveedores que incumplan el pago de comisiones, reciban quejas frecuentes, proporcionen información falsa o incumplan estos términos.</p>
+
+      <h4>6. Modificaciones</h4>
+      <p>SiConozco se reserva el derecho de modificar estos términos notificando al proveedor con al menos 15 días de anticipación por correo electrónico.</p>
+
+      <h4>7. Contacto</h4>
+      <p>📧 contactosiconozco@gmail.com</p>
+    </div>
+    <div class="terms-modal-footer">
+      <button class="btn-rechazar-terms" onclick="cerrarTerminos()">Cerrar</button>
+      <button class="btn-aceptar-terms" onclick="aceptarTerminos()">✓ Acepto los términos</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  // ── FOTOS ─────────────────────────────
+  const fotosSubidas = {};
+
+  function cargarFoto(input, index) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('preview' + index).src = e.target.result;
+      document.getElementById('slot' + index).classList.add('has-image');
+      fotosSubidas[index] = file;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function quitarFoto(index) {
+    const slot = document.getElementById('slot' + index);
+    document.getElementById('preview' + index).src = '';
+    slot.classList.remove('has-image');
+    slot.querySelector('input[type="file"]').value = '';
+    delete fotosSubidas[index];
+  }
+
+  // ── TÉRMINOS ──────────────────────────
+  function abrirTerminos(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('termsModal').classList.add('activo');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarTerminos() {
+    document.getElementById('termsModal').classList.remove('activo');
+    document.body.style.overflow = '';
+  }
+
+  function aceptarTerminos() {
+    document.getElementById('aceptaTerminos').checked = true;
+    document.getElementById('termsCheckArea').classList.remove('error');
+    document.getElementById('errTerminos').style.display = 'none';
+    cerrarTerminos();
+  }
+
+  function toggleCheck() {
+    const checkbox = document.getElementById('aceptaTerminos');
+    if (!checkbox.checked) {
+      abrirTerminos(new MouseEvent('click'));
+    } else {
+      checkbox.checked = false;
+    }
+  }
+
+  // ── VALIDACIÓN ────────────────────────
+  function validar(id, errId, condicion) {
+    const el  = document.getElementById(id);
+    const err = document.getElementById(errId);
+    if (condicion) {
+      el.classList.remove('error');
+      if (err) err.style.display = 'none';
+      return true;
+    } else {
+      el.classList.add('error');
+      if (err) err.style.display = 'block';
+      return false;
+    }
+  }
+
+  // ── ENVIAR ────────────────────────────
+  async function enviarAfiliacion() {
+    const nombre       = document.getElementById('aNombre').value.trim();
+    const tel          = document.getElementById('aTel').value.trim();
+    const email        = document.getElementById('aEmail').value.trim();
+    const direccion    = document.getElementById('aDireccion').value.trim();
+    const profesion    = document.getElementById('aProfesion').value;
+    const especialidad = document.getElementById('aEspecialidad').value.trim();
+    const descripcion  = document.getElementById('aDescripcion').value.trim();
+    const acepta       = document.getElementById('aceptaTerminos').checked;
+    const numFotos     = Object.keys(fotosSubidas).length;
+    const emailRegex   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let valido = true;
+    valido = validar('aNombre',       'errNombre',       nombre.length > 1)         && valido;
+    valido = validar('aTel',          'errTel',          tel.length > 6)             && valido;
+    valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
+    valido = validar('aDireccion',    'errDireccion',    direccion.length > 3)       && valido;
+    valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
+    valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
+    valido = validar('aDescripcion',  'errDescripcion',  descripcion.length > 10)    && valido;
+
+    if (numFotos < 3) {
+      document.getElementById('errFotos').style.display = 'block';
+      valido = false;
+    } else {
+      document.getElementById('errFotos').style.display = 'none';
+    }
+
+    if (!acepta) {
+      document.getElementById('termsCheckArea').classList.add('error');
+      document.getElementById('errTerminos').style.display = 'block';
+      valido = false;
+    }
+
+    if (!valido) return;
+
+    const btn = document.querySelector('.afil-submit');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const formData = new FormData();
+    formData.append('nombre',       nombre);
+    formData.append('telefono',     tel);
+    formData.append('email',        email);
+    formData.append('direccion',    direccion);
+    formData.append('profesion',    profesion);
+    formData.append('especialidad', especialidad);
+    formData.append('descripcion',  descripcion);
+    formData.append('terminos_aceptados', 'Sí – 13% de comisión');
+    Object.entries(fotosSubidas).forEach(([i, file]) => {
+      formData.append(`foto_${parseInt(i)+1}`, file);
+    });
+
+    try {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('afilOk').style.display = 'block';
+      } else {
+        alert('Hubo un error al enviar. Intenta de nuevo.');
+        btn.disabled = false;
+        btn.textContent = 'Enviar solicitud de afiliación';
+      }
+    } catch {
+      alert('Sin conexión. Verifica tu internet e intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = 'Enviar solicitud de afiliación';
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proveedores – SiConozco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+
+</head>
+<body>
+
+   <script>
+      // ← AGREGA ESTO PRIMERO
+      const params = new URLSearchParams(window.location.search);
+      const catParam = params.get('cat');
+      if (catParam) {
+        const matchingChip = document.querySelector(`.filter-chip[data-filter="${catParam}"]`);
+        if (matchingChip) matchingChip.click();
+      }
+
+      // código que ya tenías
+      function toggleMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('open');
+        document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+      }
+
+      const chips = document.querySelectorAll('.filter-chip');
+      // ...resto del código
+    </script>
+
+<!-- NAV -->
+<nav>
+  <a href="siconozco-html.html" class="logo">
+    <div class="logo-icon">🔧</div>
+    siconozco<span>.com</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="siconozco_v2.html">Inicio</a></li>
+    <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="siconozco_v2.html#categorias">Categorías</a></li>
+    <li><a href="#">Publicar servicio</a></li>
+    <li><a href="#" class="btn-contact">contacto</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="toggleMenu()">✕</button>
+  <a href="siconozco_v2.html" onclick="toggleMenu()">Inicio</a>
+  <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="siconozco_v2.html#categorias" onclick="toggleMenu()">Categorías</a>
+  <a href="#" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="#" onclick="toggleMenu()">Contacto</a>
+</div>
+
+<!-- HEADER -->
+<div class="prov-header">
+  <h1>Encuentra Profesionales en Saltillo</h1>
+  <p>Contacta y contrata carpinteros, herreros, albañiles y más</p>
+
+  <div class="prov-search">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar por nombre, especialidad o ubicación…">
+  </div>
+
+  <div class="prov-filters">
+    <span class="filter-icon">▾</span>
+    <button class="filter-chip active" data-filter="todos">Todos</button>
+    <button class="filter-chip" data-filter="carpintero">Carpintero</button>
+    <button class="filter-chip" data-filter="herrero">Herrero</button>
+    <button class="filter-chip" data-filter="albanil">Albañil</button>
+    <button class="filter-chip" data-filter="electricista">Electricista</button>
+    <button class="filter-chip" data-filter="plomero">Plomero</button>
+    <button class="filter-chip" data-filter="pintor">Pintor</button>
+  </div>
+</div>
+
+<div class="prov-results-bar">
+  <span id="resultsCount">12 profesionales encontrados</span>
+</div>
+
+<!-- GRID -->
+<section class="prov-grid-section">
+  <div class="prov-grid" id="provGrid">
+
+    <div class="prov-card visible" data-cat="carpintero" data-name="carlos rodríguez muebles a medida y restauración">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&q=80" alt="Carpintero">
+        <span class="prov-card-badge">Carpintero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Carlos Rodríguez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.8 <span class="count">(127)</span></div>
+        </div>
+        <p class="specialty">Muebles a medida y restauración</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. República Oriente, Saltillo</div>
+          <div class="prov-meta-row">💼 12 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528441234567" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:carlos.rodriguez@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 123 4567</span>
+          <span>✉️ carlos.rodriguez@email.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prov-card visible" data-cat="herrero" data-name="miguel ángel torres portones rejas y estructuras metálicas">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=500&q=80" alt="Herrero">
+        <span class="prov-card-badge">Herrero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Miguel Ángel Torres</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(94)</span></div>
+        </div>
+        <p class="specialty">Portones, rejas y estructuras metálicas</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Los Pinos, Saltillo</div>
+          <div class="prov-meta-row">💼 15 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528449876543" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:miguel.torres@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 987 6543</span>
+          <span>✉️ miguel.torres@email.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prov-card visible" data-cat="albanil" data-name="josé luis martínez construcción y remodelación">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=500&q=80" alt="Albañil">
+        <span class="prov-card-badge">Albañil</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>José Luis Martínez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.7 <span class="count">(156)</span></div>
+        </div>
+        <p class="specialty">Construcción y remodelación</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Valle de las Flores, Saltillo</div>
+          <div class="prov-meta-row">💼 18 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528442468135" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:joseluis.martinez@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 246 8135</span>
+          <span>✉️ joseluis.martinez@email.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prov-card visible" data-cat="electricista" data-name="ana sofía gómez instalaciones eléctricas residenciales">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=500&q=80" alt="Electricista">
+        <span class="prov-card-badge">Electricista</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Ana Sofía Gómez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(81)</span></div>
+        </div>
+        <p class="specialty">Instalaciones eléctricas residenciales</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Centro, Saltillo</div>
+          <div class="prov-meta-row">💼 9 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528441112233" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:ana.gomez@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 111 2233</span>
+          <span>✉️ ana.gomez@email.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prov-card visible" data-cat="plomero" data-name="luis hernández plomería general y fugas">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1607472829322-15c5c7c1bcfd?w=500&q=80" alt="Plomero">
+        <span class="prov-card-badge">Plomero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Luis Hernández</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.6 <span class="count">(58)</span></div>
+        </div>
+        <p class="specialty">Plomería general y reparación de fugas</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Saltillo 400, Saltillo</div>
+          <div class="prov-meta-row">💼 11 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528443334455" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:luis.hernandez@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 333 4455</span>
+          <span>✉️ luis.hernandez@email.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="prov-card visible" data-cat="pintor" data-name="diana flores pintura interior y exterior">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500&q=80" alt="Pintor">
+        <span class="prov-card-badge">Pintor</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Diana Flores</h3>
+          <div class="prov-rating"><span class="star">★</span> 5.0 <span class="count">(112)</span></div>
+        </div>
+        <p class="specialty">Pintura interior y exterior, acabados finos</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Mirasierra, Saltillo</div>
+          <div class="prov-meta-row">💼 7 años de experiencia</div>
+        </div>
+        <div class="prov-actions">
+          <a href="tel:+528445556677" class="prov-btn prov-btn-call">📞 Llamar</a>
+          <a href="mailto:diana.flores@email.com" class="prov-btn prov-btn-email">✉️ Email</a>
+        </div>
+        <div class="prov-contact-info">
+          <span>📞 +52 844 555 6677</span>
+          <span>✉️ diana.flores@email.com</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  const chips = document.querySelectorAll('.filter-chip');
+  const cards = document.querySelectorAll('.prov-card');
+  const searchInput = document.getElementById('searchInput');
+  const resultsCount = document.getElementById('resultsCount');
+  let activeFilter = 'todos';
+
+  function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const matchesCategory = activeFilter === 'todos' || card.dataset.cat === activeFilter;
+      const matchesSearch = card.dataset.name.includes(query);
+      const shouldShow = matchesCategory && matchesSearch;
+      card.classList.toggle('visible', shouldShow);
+      if (shouldShow) visibleCount++;
+    });
+
+    resultsCount.textContent = `${visibleCount} profesional${visibleCount === 1 ? '' : 'es'} encontrado${visibleCount === 1 ? '' : 's'}`;
+
+    const grid = document.getElementById('provGrid');
+    const existingEmpty = grid.querySelector('.prov-empty');
+    if (visibleCount === 0 && !existingEmpty) {
+      const empty = document.createElement('div');
+      empty.className = 'prov-empty';
+      empty.innerHTML = '<span>🔍</span>No encontramos profesionales con esos filtros.';
+      grid.appendChild(empty);
+    } else if (visibleCount > 0 && existingEmpty) {
+      existingEmpty.remove();
+    }
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  searchInput.addEventListener('input', applyFilters);
+</script>
+
+</body>
+</html>

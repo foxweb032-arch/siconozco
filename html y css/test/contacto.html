@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contacto – SiConozco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="siconozco-html.html" class="logo">
+    <div class="logo-icon"><img src="SCpng.png" alt="logo"></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="siconozco-html.html">Inicio</a></li>
+    <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
+    <li><a href="afiliacion.html">Publicar servicio</a></li>
+    <li><a href="contacto.html" class="btn-contact">contacto</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="toggleMenu()">✕</button>
+  <a href="siconozco-html.html" onclick="toggleMenu()">Inicio</a>
+  <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
+  <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
+</div>
+
+<!-- HERO -->
+<div class="contact-hero">
+  <h1>¿En qué te podemos ayudar?</h1>
+  <p>Escríbenos cualquier duda sobre nuestro servicio y te respondemos lo antes posible</p>
+</div>
+
+<!-- CONTENIDO -->
+<div class="contact-container">
+
+  <!-- INFO -->
+  <div class="contact-info">
+    <div>
+      <h2 class="contact-info-title">Contáctanos</h2>
+      <p class="contact-info-sub">También puedes escribirnos directamente por cualquiera de estos medios:</p>
+    </div>
+
+    <a href="mailto:contactosiconozco@gmail.com" class="contact-item">
+      <div class="contact-item-icon blue">✉️</div>
+      <div class="contact-item-text">
+        <p>Email</p>
+        <span>contactosiconozco@gmail.com</span>
+      </div>
+    </a>
+
+    <a href="https://wa.me/TUNUMERO" target="_blank" class="contact-item">
+      <div class="contact-item-icon green">💬</div>
+      <div class="contact-item-text">
+        <p>WhatsApp</p>
+        <span>Escríbenos por WhatsApp</span>
+      </div>
+    </a>
+
+    <div class="contact-item" style="cursor:default;">
+      <div class="contact-item-icon yellow">⏱️</div>
+      <div class="contact-item-text">
+        <p>Tiempo de respuesta</p>
+        <span>Menos de 24 horas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="contact-card">
+    <div id="contactFormContent">
+      <h2>Envíanos un mensaje</h2>
+
+      <div class="c-row">
+        <div class="c-group">
+          <label for="cNombre">Nombre <span>*</span></label>
+          <input type="text" id="cNombre" placeholder="Tu nombre">
+          <span class="c-error" id="errCNombre">Ingresa tu nombre</span>
+        </div>
+        <div class="c-group">
+          <label for="cTel">Teléfono</label>
+          <input type="tel" id="cTel" placeholder="Opcional">
+        </div>
+      </div>
+
+      <div class="c-group">
+        <label for="cEmail">Email <span>*</span></label>
+        <input type="email" id="cEmail" placeholder="correo@ejemplo.com">
+        <span class="c-error" id="errCEmail">Ingresa un email válido</span>
+      </div>
+
+      <div class="c-group">
+        <label for="cAsunto">Asunto <span>*</span></label>
+        <select id="cAsunto">
+          <option value="" disabled selected>Selecciona un asunto</option>
+          <option value="duda-servicio">Duda sobre el servicio</option>
+          <option value="duda-proveedor">Información sobre un proveedor</option>
+          <option value="problema-reservacion">Problema con una reservación</option>
+          <option value="afiliacion">Información para afiliarme</option>
+          <option value="sugerencia">Sugerencia o comentario</option>
+          <option value="otro">Otro</option>
+        </select>
+        <span class="c-error" id="errCAsunto">Selecciona un asunto</span>
+      </div>
+
+      <div class="c-group">
+        <label for="cMensaje">Mensaje <span>*</span></label>
+        <textarea id="cMensaje" placeholder="Escribe tu mensaje aquí..."></textarea>
+        <span class="c-error" id="errCMensaje">Escribe tu mensaje</span>
+      </div>
+
+      <button class="btn-enviar" onclick="enviarContacto()">Enviar mensaje</button>
+    </div>
+
+    <div class="contact-ok" id="contactOk">
+      <span>✅</span>
+      <h3>¡Mensaje enviado!</h3>
+      <p>Gracias por escribirnos. Te responderemos a la brevedad posible en el correo que nos proporcionaste.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  function validarC(id, errId, condicion) {
+    const el  = document.getElementById(id);
+    const err = document.getElementById(errId);
+    if (condicion) {
+      el.classList.remove('error');
+      if (err) err.style.display = 'none';
+      return true;
+    } else {
+      el.classList.add('error');
+      if (err) err.style.display = 'block';
+      return false;
+    }
+  }
+
+  async function enviarContacto() {
+    const nombre  = document.getElementById('cNombre').value.trim();
+    const email   = document.getElementById('cEmail').value.trim();
+    const asunto  = document.getElementById('cAsunto').value;
+    const mensaje = document.getElementById('cMensaje').value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let valido = true;
+    valido = validarC('cNombre',  'errCNombre',  nombre.length > 1)        && valido;
+    valido = validarC('cEmail',   'errCEmail',   emailRegex.test(email))   && valido;
+    valido = validarC('cAsunto',  'errCAsunto',  asunto !== '')             && valido;
+    valido = validarC('cMensaje', 'errCMensaje', mensaje.length > 5)       && valido;
+
+    if (!valido) return;
+
+    const btn = document.querySelector('.btn-enviar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    // Cambia YOUR_FORM_ID por tu ID real de formspree.io
+    const formData = new FormData();
+    formData.append('nombre',  nombre);
+    formData.append('email',   email);
+    formData.append('telefono', document.getElementById('cTel').value.trim());
+    formData.append('asunto',  asunto);
+    formData.append('mensaje', mensaje);
+
+    try {
+      const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        document.getElementById('contactFormContent').style.display = 'none';
+        document.getElementById('contactOk').style.display = 'block';
+      } else {
+        alert('Hubo un error. Intenta de nuevo.');
+        btn.disabled = false;
+        btn.textContent = 'Enviar mensaje';
+      }
+    } catch {
+      alert('Sin conexión. Verifica tu internet e intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = 'Enviar mensaje';
+    }
+  }
+</script>
+
+</body>
+</html>

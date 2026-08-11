@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Términos y Condiciones – SiConozco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+<style>
+  .terms-hero {
+    background: var(--black);
+    padding: 60px 5%;
+    text-align: center;
+  }
+  .terms-hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--yellow);
+    margin-bottom: 12px;
+  }
+  .terms-hero p {
+    color: rgba(255,255,255,.65);
+    font-size: 0.88rem;
+  }
+  .terms-container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 5% 80px;
+  }
+  .terms-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 40px;
+  }
+  .terms-card h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    margin: 28px 0 10px;
+    color: var(--black);
+  }
+  .terms-card h2:first-child { margin-top: 0; }
+  .terms-card p {
+    font-size: 0.9rem;
+    color: var(--mid-gray);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+  .terms-card ul {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+  .terms-card ul li {
+    font-size: 0.9rem;
+    color: var(--mid-gray);
+    line-height: 1.8;
+    margin-bottom: 6px;
+  }
+  .terms-highlight {
+    background: var(--yellow);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .terms-highlight p {
+    color: var(--black);
+    font-weight: 600;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+  .terms-divider {
+    height: 1px;
+    background: #EFEFEF;
+    margin: 24px 0;
+  }
+  .terms-fecha {
+    font-size: 0.78rem;
+    color: #BBB;
+    text-align: right;
+    margin-top: 32px;
+  }
+  @media (max-width: 600px) {
+    .terms-card { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="siconozco-html.html" class="logo">
+    <div class="logo-icon"><img src="SCpng.png" alt="logo"></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="siconozco-html.html">Inicio</a></li>
+    <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
+    <li><a href="afiliacion.html">Publicar servicio</a></li>
+    <li><a href="contacto.html" class="btn-contact">contacto</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="toggleMenu()">✕</button>
+  <a href="siconozco-html.html" onclick="toggleMenu()">Inicio</a>
+  <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
+  <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
+</div>
+
+<div class="terms-hero">
+  <h1>Términos y Condiciones</h1>
+  <p>Para proveedores afiliados a SiConozco</p>
+</div>
+
+<div class="terms-container">
+  <div class="terms-card">
+
+    <h2>1. Acuerdo general</h2>
+    <p>Al registrarte como proveedor en SiConozco, aceptas cumplir con los presentes Términos y Condiciones. Este acuerdo es entre tú (el proveedor) y SiConozco, plataforma intermediaria de servicios profesionales.</p>
+    <p>SiConozco actúa como intermediario entre clientes y proveedores de servicios. No somos empleadores ni contratistas directos de ningún proveedor.</p>
+
+    <div class="terms-divider"></div>
+
+    <h2>2. Comisión por servicio</h2>
+    <div class="terms-highlight">
+      <p>💰 SiConozco cobra una comisión del 13% sobre el valor total de cada servicio contratado a través de la plataforma.</p>
+    </div>
+    <p>Esta comisión aplica a todos los trabajos originados mediante solicitudes recibidas a través de SiConozco, incluyendo llamadas, formularios web o mensajes de WhatsApp gestionados por la plataforma.</p>
+    <p>El proveedor se compromete a transferir el 13% correspondiente a SiConozco dentro de los <strong>5 días hábiles</strong> posteriores a haber cobrado el servicio al cliente.</p>
+
+    <div class="terms-divider"></div>
+
+    <h2>3. Obligaciones del proveedor</h2>
+    <ul>
+      <li>Proporcionar información veraz y actualizada al momento del registro.</li>
+      <li>Brindar el servicio con profesionalismo, puntualidad y calidad.</li>
+      <li>Notificar a SiConozco cuando un servicio sea completado y el monto cobrado.</li>
+      <li>Pagar la comisión acordada en tiempo y forma.</li>
+      <li>No contactar directamente a clientes originados por SiConozco para evadir la comisión.</li>
+      <li>Mantener una calificación mínima de 3.5 estrellas para continuar en la plataforma.</li>
+    </ul>
+
+    <div class="terms-divider"></div>
+
+    <h2>4. Exclusividad y captación de clientes</h2>
+    <p>Queda estrictamente prohibido que el proveedor redireccionne a clientes captados a través de SiConozco hacia canales de contacto directo con el objetivo de evadir la comisión de la plataforma.</p>
+    <p>En caso de detectarse esta práctica, SiConozco se reserva el derecho de dar de baja al proveedor de la plataforma de forma inmediata y sin reembolso.</p>
+
+    <div class="terms-divider"></div>
+
+    <h2>5. Baja de la plataforma</h2>
+    <p>SiConozco se reserva el derecho de dar de baja a cualquier proveedor que:</p>
+    <ul>
+      <li>Incumpla con el pago de comisiones de manera reiterada.</li>
+      <li>Reciba quejas frecuentes por parte de los clientes.</li>
+      <li>Proporcione información falsa al momento del registro.</li>
+      <li>Incumpla con cualquier punto de estos términos.</li>
+    </ul>
+
+    <div class="terms-divider"></div>
+
+    <h2>6. Modificaciones</h2>
+    <p>SiConozco se reserva el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados al proveedor con al menos <strong>15 días de anticipación</strong> a través del correo electrónico registrado.</p>
+
+    <div class="terms-divider"></div>
+
+    <h2>7. Contacto</h2>
+    <p>Para cualquier duda sobre estos términos puedes contactarnos en:</p>
+    <p><strong>📧</strong> contactosiconozco@gmail.com</p>
+
+    <p class="terms-fecha">Última actualización: agosto 2026</p>
+  </div>
+</div>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+</script>
+</body>
+</html>
