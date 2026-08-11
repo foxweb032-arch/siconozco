@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proveedores – SiConozco</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+</head>
+<body>
+
+<nav>
+  <a href="siconozco-html.html" class="logo">
+    <div class="logo-icon"><img src="SCpng.png" alt="logo"></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="siconozco-html.html">Inicio</a></li>
+    <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
+    <li><a href="afiliacion.html">Publicar servicio</a></li>
+    <li><a href="contacto.html" class="btn-contact">contacto</a></li>
+  </ul>
+  <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-btn" onclick="toggleMenu()">✕</button>
+  <a href="siconozco-html.html" onclick="toggleMenu()">Inicio</a>
+  <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
+  <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
+</div>
+
+<div class="prov-header">
+  <h1>Encuentra Profesionales en Saltillo</h1>
+  <p>Contacta y contrata carpinteros, herreros, albañiles y más</p>
+  <div class="prov-search">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar por nombre, especialidad o ubicación…">
+  </div>
+  <div class="prov-filters">
+    <button class="filter-chip active" data-filter="todos">Todos</button>
+    <button class="filter-chip" data-filter="carpintero">Carpintero</button>
+    <button class="filter-chip" data-filter="herrero">Herrero</button>
+    <button class="filter-chip" data-filter="albanil">Albañil</button>
+    <button class="filter-chip" data-filter="electricista">Electricista</button>
+    <button class="filter-chip" data-filter="plomero">Plomero</button>
+    <button class="filter-chip" data-filter="pintor">Pintor</button>
+  </div>
+</div>
+
+<div class="prov-results-bar">
+  <span id="resultsCount"></span>
+</div>
+
+<section class="prov-grid-section">
+  <div class="prov-grid" id="provGrid">
+
+    <!-- data-id debe coincidir exactamente con la clave en horarios.json -->
+
+    <div class="prov-card" data-cat="carpintero" data-id="carlos-rodriguez"
+      data-name="carlos rodríguez muebles a medida y restauración">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&q=80" alt="Carpintero">
+        <span class="prov-card-badge">Carpintero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Carlos Rodríguez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.8 <span class="count">(127)</span></div>
+        </div>
+        <p class="specialty">Muebles a medida y restauración</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. República Oriente, Saltillo</div>
+          <div class="prov-meta-row">💼 12 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+    <div class="prov-card" data-cat="herrero" data-id="miguel-torres"
+      data-name="miguel ángel torres portones rejas y estructuras metálicas">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=500&q=80" alt="Herrero">
+        <span class="prov-card-badge">Herrero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Miguel Ángel Torres</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(94)</span></div>
+        </div>
+        <p class="specialty">Portones, rejas y estructuras metálicas</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Los Pinos, Saltillo</div>
+          <div class="prov-meta-row">💼 15 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+    <div class="prov-card" data-cat="albanil" data-id="jose-martinez"
+      data-name="josé luis martínez construcción y remodelación">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=500&q=80" alt="Albañil">
+        <span class="prov-card-badge">Albañil</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>José Luis Martínez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.7 <span class="count">(156)</span></div>
+        </div>
+        <p class="specialty">Construcción y remodelación</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Valle de las Flores, Saltillo</div>
+          <div class="prov-meta-row">💼 18 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+    <div class="prov-card" data-cat="electricista" data-id="ana-gomez"
+      data-name="ana sofía gómez instalaciones eléctricas residenciales">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=500&q=80" alt="Electricista">
+        <span class="prov-card-badge">Electricista</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Ana Sofía Gómez</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(81)</span></div>
+        </div>
+        <p class="specialty">Instalaciones eléctricas residenciales</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Centro, Saltillo</div>
+          <div class="prov-meta-row">💼 9 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+    <div class="prov-card" data-cat="plomero" data-id="luis-hernandez"
+      data-name="luis hernández plomería general y fugas">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1607472829322-15c5c7c1bcfd?w=500&q=80" alt="Plomero">
+        <span class="prov-card-badge">Plomero</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Luis Hernández</h3>
+          <div class="prov-rating"><span class="star">★</span> 4.6 <span class="count">(58)</span></div>
+        </div>
+        <p class="specialty">Plomería general y reparación de fugas</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Saltillo 400, Saltillo</div>
+          <div class="prov-meta-row">💼 11 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+    <div class="prov-card" data-cat="pintor" data-id="diana-flores"
+      data-name="diana flores pintura interior y exterior">
+      <div class="prov-card-img-wrap">
+        <img class="prov-card-img" src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500&q=80" alt="Pintor">
+        <span class="prov-card-badge">Pintor</span>
+      </div>
+      <div class="prov-card-body">
+        <div class="prov-card-top">
+          <h3>Diana Flores</h3>
+          <div class="prov-rating"><span class="star">★</span> 5.0 <span class="count">(112)</span></div>
+        </div>
+        <p class="specialty">Pintura interior y exterior, acabados finos</p>
+        <div class="prov-meta">
+          <div class="prov-meta-row">📍 Col. Mirasierra, Saltillo</div>
+          <div class="prov-meta-row">💼 7 años de experiencia</div>
+        </div>
+        <button class="prov-card-cta">Solicitar servicio</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiFondo(event)">
+  <div class="modal-box">
+    <img class="modal-img" id="modalImg" src="" alt="">
+    <div class="modal-body">
+      <div class="modal-header">
+        <h2 id="modalNombre"></h2>
+        <button class="modal-close" onclick="cerrarModal()">✕</button>
+      </div>
+      <p class="modal-specialty" id="modalEspecialidad"></p>
+      <div class="modal-meta">
+        <div class="modal-meta-row">⭐ <span id="modalRating"></span></div>
+        <div class="modal-meta-row">📍 <span id="modalUbicacion"></span></div>
+        <div class="modal-meta-row">💼 <span id="modalExperiencia"></span></div>
+      </div>
+
+      <!-- PASO 1: ELEGIR DÍA Y HORA -->
+      <div id="paso1">
+        <div class="modal-form">
+          <h3>📅 Selecciona día y hora</h3>
+
+          <div id="horariosLoading" style="text-align:center; padding:20px; color:var(--mid-gray); font-size:0.9rem;">
+            Cargando disponibilidad…
+          </div>
+
+          <div id="horariosContent" style="display:none;">
+            <p class="sched-label">Días disponibles</p>
+            <div class="dias-grid" id="diasGrid"></div>
+
+            <div id="horasSection" style="display:none;">
+              <p class="sched-label" id="horasLabel">Horarios disponibles</p>
+              <div class="horas-grid" id="horasGrid"></div>
+            </div>
+
+            <div class="sched-selected" id="schedSelected" style="display:none;">
+              <span>✅</span>
+              <span id="schedSelectedText"></span>
+              <button onclick="limpiarSeleccion()">Cambiar</button>
+            </div>
+
+            <div id="sinHorarios" style="display:none; text-align:center; padding:20px; color:var(--mid-gray); font-size:0.88rem;">
+              😔 Este proveedor no tiene horarios disponibles por el momento.<br>
+              <small>Contáctanos directamente para coordinar.</small>
+            </div>
+          </div>
+
+          <button class="btn-solicitar" id="btnSiguiente" onclick="irPaso2()" disabled>
+            Continuar →
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 2: DATOS DEL CLIENTE -->
+      <div id="paso2" style="display:none;">
+        <div class="modal-form">
+          <button class="btn-back" onclick="irPaso1()">← Cambiar horario</button>
+          <h3>📋 Tus datos de contacto</h3>
+
+          <form id="solicitudForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+            <input type="hidden" name="proveedor" id="formProveedor">
+            <input type="hidden" name="categoria" id="formCategoria">
+            <input type="hidden" name="fecha_hora" id="formFechaHora">
+
+            <div class="form-group">
+              <label for="fNombre">Nombre completo</label>
+              <input type="text" id="fNombre" name="nombre" placeholder="Tu nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="fTel">Teléfono</label>
+              <input type="tel" id="fTel" name="telefono" placeholder="Ej. 844 123 4567" required>
+            </div>
+            <div class="form-group">
+              <label for="fDireccion">Dirección del servicio</label>
+              <input type="text" id="fDireccion" name="direccion" placeholder="Calle, colonia, ciudad" required>
+            </div>
+            <div class="form-group">
+              <label for="fDesc">Descripción del trabajo</label>
+              <textarea id="fDesc" name="descripcion" placeholder="Describe brevemente qué necesitas..." required></textarea>
+            </div>
+
+            <div class="sched-resumen" id="schedResumen"></div>
+
+            <button type="submit" class="btn-solicitar">Enviar solicitud por email</button>
+          </form>
+
+          <button class="btn-whatsapp" onclick="enviarWhatsApp()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Enviar por WhatsApp
+          </button>
+
+          <div class="form-ok" id="formOk">
+            <span>✅</span>
+            <p>¡Solicitud enviada! Te confirmaremos el horario a la brevedad.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const WHATSAPP_NUM = 'TUNUMERO';
+
+  const DIAS_NOMBRES = {
+    lun: 'Lunes', mar: 'Martes', mie: 'Miércoles',
+    jue: 'Jueves', vie: 'Viernes', sab: 'Sábado', dom: 'Domingo'
+  };
+
+  // Horarios cargados desde el JSON
+  let todosLosHorarios = {};
+  let horarioActual    = {};
+  let diaSeleccionado  = null;
+  let horaSeleccionada = null;
+
+  // ── CARGAR JSON AL INICIAR ────────────
+  fetch('horarios.json')
+    .then(res => res.json())
+    .then(data => { todosLosHorarios = data; })
+    .catch(() => console.warn('No se pudo cargar horarios.json'));
+
+  // ── MENU MÓVIL ────────────────────────
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+
+  // ── FILTROS ───────────────────────────
+  const chips       = document.querySelectorAll('.filter-chip');
+  const cards       = document.querySelectorAll('.prov-card');
+  const searchInput = document.getElementById('searchInput');
+  const resultsCount = document.getElementById('resultsCount');
+  let activeFilter  = 'todos';
+
+  function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const matchCat    = activeFilter === 'todos' || card.dataset.cat === activeFilter;
+      const matchSearch = card.dataset.name.includes(query);
+      const show        = matchCat && matchSearch;
+      card.classList.toggle('visible', show);
+      if (show) visibleCount++;
+    });
+    resultsCount.textContent = `${visibleCount} profesional${visibleCount === 1 ? '' : 'es'} encontrado${visibleCount === 1 ? '' : 's'}`;
+    const grid = document.getElementById('provGrid');
+    const existingEmpty = grid.querySelector('.prov-empty');
+    if (visibleCount === 0 && !existingEmpty) {
+      const empty = document.createElement('div');
+      empty.className = 'prov-empty';
+      empty.innerHTML = '<span>🔍</span>No encontramos profesionales con esos filtros.';
+      grid.appendChild(empty);
+    } else if (visibleCount > 0 && existingEmpty) {
+      existingEmpty.remove();
+    }
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      applyFilters();
+    });
+  });
+  searchInput.addEventListener('input', applyFilters);
+
+  // ── ABRIR MODAL ───────────────────────
+  function abrirModal(card) {
+    const id = card.dataset.id;
+
+    document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
+    document.getElementById('modalEspecialidad').textContent = card.querySelector('.specialty').textContent;
+    document.getElementById('modalRating').textContent       = card.querySelector('.prov-rating').textContent.trim();
+    document.getElementById('modalUbicacion').textContent    = card.querySelectorAll('.prov-meta-row')[0].textContent.replace('📍','').trim();
+    document.getElementById('modalExperiencia').textContent  = card.querySelectorAll('.prov-meta-row')[1].textContent.replace('💼','').trim();
+    document.getElementById('modalImg').src                  = card.querySelector('.prov-card-img').src;
+    document.getElementById('formProveedor').value           = card.querySelector('h3').textContent;
+    document.getElementById('formCategoria').value           = card.dataset.cat;
+
+    // Cargar horarios desde el JSON
+    horarioActual    = todosLosHorarios[id] || {};
+    diaSeleccionado  = null;
+    horaSeleccionada = null;
+
+    document.getElementById('horariosLoading').style.display  = 'none';
+    document.getElementById('horariosContent').style.display  = 'block';
+
+    const tieneDias = Object.keys(horarioActual).length > 0;
+    document.getElementById('sinHorarios').style.display      = tieneDias ? 'none' : 'block';
+    document.getElementById('diasGrid').style.display         = tieneDias ? 'flex' : 'none';
+
+    renderDias();
+    irPaso1();
+
+    document.getElementById('solicitudForm').reset();
+    document.getElementById('formOk').style.display = 'none';
+    document.getElementById('modalOverlay').classList.add('activo');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // ── RENDER DÍAS ───────────────────────
+  function renderDias() {
+    const grid = document.getElementById('diasGrid');
+    grid.innerHTML = '';
+    Object.keys(horarioActual).forEach(dia => {
+      const btn = document.createElement('button');
+      btn.className    = 'dia-btn';
+      btn.textContent  = DIAS_NOMBRES[dia];
+      btn.dataset.dia  = dia;
+      btn.onclick      = () => seleccionarDia(dia);
+      grid.appendChild(btn);
+    });
+    document.getElementById('horasSection').style.display  = 'none';
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  // ── SELECCIONAR DÍA ───────────────────
+  function seleccionarDia(dia) {
+    diaSeleccionado  = dia;
+    horaSeleccionada = null;
+    document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.dia-btn[data-dia="${dia}"]`).classList.add('active');
+    renderHoras(dia);
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  // ── RENDER HORAS ──────────────────────
+  function renderHoras(dia) {
+    const grid = document.getElementById('horasGrid');
+    grid.innerHTML = '';
+    document.getElementById('horasLabel').textContent = `Horarios disponibles — ${DIAS_NOMBRES[dia]}`;
+    horarioActual[dia].forEach(hora => {
+      const btn   = document.createElement('button');
+      btn.className   = 'hora-btn';
+      btn.textContent = hora;
+      btn.onclick     = (e) => seleccionarHora(hora, dia, e.target);
+      grid.appendChild(btn);
+    });
+    document.getElementById('horasSection').style.display = 'block';
+  }
+
+  // ── SELECCIONAR HORA ──────────────────
+  function seleccionarHora(hora, dia, btn) {
+    horaSeleccionada = hora;
+    document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const texto = `${DIAS_NOMBRES[dia]} a las ${hora}`;
+    document.getElementById('schedSelectedText').textContent = texto;
+    document.getElementById('schedSelected').style.display  = 'flex';
+    document.getElementById('formFechaHora').value          = texto;
+    document.getElementById('btnSiguiente').disabled        = false;
+    document.getElementById('schedResumen').innerHTML       =
+      `<span>📅</span> <strong>${DIAS_NOMBRES[dia]}</strong> a las <strong>${hora}</strong>`;
+  }
+
+  function limpiarSeleccion() {
+    horaSeleccionada = null;
+    document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  // ── PASOS ─────────────────────────────
+  function irPaso1() {
+    document.getElementById('paso1').style.display = 'block';
+    document.getElementById('paso2').style.display = 'none';
+  }
+  function irPaso2() {
+    if (!diaSeleccionado || !horaSeleccionada) return;
+    document.getElementById('paso1').style.display = 'none';
+    document.getElementById('paso2').style.display = 'block';
+  }
+
+  // ── CERRAR MODAL ──────────────────────
+  function cerrarModal() {
+    document.getElementById('modalOverlay').classList.remove('activo');
+    document.body.style.overflow = '';
+  }
+  function cerrarModalSiFondo(e) {
+    if (e.target === document.getElementById('modalOverlay')) cerrarModal();
+  }
+
+  // ── CLICK EN CARD ─────────────────────
+  document.querySelectorAll('.prov-card').forEach(card => {
+    card.addEventListener('click', () => abrirModal(card));
+  });
+
+  // ── FORMSPREE ─────────────────────────
+  document.getElementById('solicitudForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const res = await fetch(this.action, {
+      method: 'POST',
+      body: new FormData(this),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      document.getElementById('formOk').style.display = 'block';
+      this.reset();
+    } else {
+      alert('Hubo un error. Intenta de nuevo.');
+    }
+  });
+
+  // ── WHATSAPP ──────────────────────────
+  function enviarWhatsApp() {
+    const proveedor = document.getElementById('formProveedor').value;
+    const fechaHora = document.getElementById('formFechaHora').value;
+    const nombre    = document.getElementById('fNombre').value;
+    const telefono  = document.getElementById('fTel').value;
+    const direccion = document.getElementById('fDireccion').value;
+    const desc      = document.getElementById('fDesc').value;
+
+    if (!nombre || !telefono || !direccion || !desc) {
+      alert('Por favor llena todos los campos antes de enviar por WhatsApp.');
+      return;
+    }
+
+    const msg =
+      `🔧 *Nueva solicitud de servicio*\n\n` +
+      `*Proveedor:* ${proveedor}\n` +
+      `*Horario solicitado:* ${fechaHora}\n` +
+      `*Cliente:* ${nombre}\n` +
+      `*Teléfono:* ${telefono}\n` +
+      `*Dirección:* ${direccion}\n` +
+      `*Descripción:* ${desc}`;
+
+    window.open(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  // ── URL PARAMS ────────────────────────
+  const params   = new URLSearchParams(window.location.search);
+  const catParam = params.get('cat');
+  if (catParam) {
+    const matchingChip = document.querySelector(`.filter-chip[data-filter="${catParam}"]`);
+    if (matchingChip) matchingChip.click();
+  } else {
+    applyFilters();
+  }
+</script>
+
+</body>
+</html>
