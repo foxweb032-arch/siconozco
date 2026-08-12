@@ -1393,4 +1393,63 @@
 }
 .btn-dark:hover {
   background: var(--dark-gray);
+  
+  * ══════════════════════════════════════
+   CALENDARIO DE RESERVACIONES
+══════════════════════════════════════ */
+.cal-wrapper { margin-bottom: 16px; }
+.cal-nav {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+}
+.cal-nav h4 {
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--black); text-transform: capitalize;
+}
+.cal-nav-btn {
+  background: var(--light-gray); border: none;
+  border-radius: 8px; width: 32px; height: 32px;
+  cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s; color: var(--black);
+}
+.cal-nav-btn:hover { background: #DDD; }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal-day-header {
+  text-align: center; font-size: 0.7rem;
+  font-weight: 700; color: var(--mid-gray);
+  padding: 4px 0; text-transform: uppercase;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+  cursor: default; transition: all .15s;
+  border: 1.5px solid transparent;
+}
+.cal-day.vacio { background: transparent; }
+.cal-day.pasado { color: #CCC; background: transparent; }
+.cal-day.no-disponible { color: #CCC; background: transparent; }
+.cal-day.disponible {
+  background: var(--light-gray); color: var(--black);
+  cursor: pointer; font-weight: 700;
+}
+.cal-day.disponible:hover { background: var(--yellow); border-color: var(--yellow-dark); }
+.cal-day.seleccionado { background: var(--black); color: var(--white); border-color: var(--black); }
+.cal-day.hoy { border-color: var(--yellow-dark); }
+.cal-leyenda {
+  display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+}
+.cal-leyenda-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; color: var(--mid-gray);
+}
+.cal-leyenda-dot { width: 10px; height: 10px; border-radius: 3px; }
+.cal-leyenda-dot.disponible { background: var(--light-gray); border: 1px solid #CCC; }
+.cal-leyenda-dot.seleccionado { background: var(--black); }
+.cal-leyenda-dot.no-disponible { background: transparent; border: 1px solid #EEE; }
 }
