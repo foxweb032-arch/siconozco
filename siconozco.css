@@ -1360,4 +1360,37 @@
 .btn-back:hover { color: var(--black); }
 }
 	
-	
+	/* ── BOTONES DE TARJETA ACTUALIZADOS ── */
+.btn-agenda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s, opacity .15s;
+  border: none;
+  width: 100%;
+  letter-spacing: .02em;
+}
+.btn-agenda:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
+}
+.btn-yellow {
+  background: var(--yellow);
+  color: var(--black);
+}
+.btn-yellow:hover {
+  background: var(--yellow-dark);
+}
+.btn-dark {
+  background: var(--black);
+  color: var(--white);
+}
+.btn-dark:hover {
+  background: var(--dark-gray);
+}
