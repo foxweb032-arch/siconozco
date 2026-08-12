@@ -216,7 +216,7 @@
     flex-shrink: 0;
   }
   .logo-icon {
-    width: 250px; height: 43px;
+    width: 250px; height: 125px;
     background: transparent;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
