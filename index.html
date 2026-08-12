@@ -59,7 +59,7 @@
     <a href="proveedores.html?cat=pintor" class="cat-card"><div class="cat-icon">🎨</div><span>Pintor</span></a>
     <a href="proveedores.html?cat=carpintero" class="cat-card"><div class="cat-icon">🪚</div><span>Carpintero</span></a>
     <a href="proveedores.html?cat=vidriero" class="cat-card"><div class="cat-icon">🪟</div><span>Vidriero</span></a>
-	<a href="proveedores.html?cat=jardinero" class="cat-card"><div class="cat-icon">🍃</div><span>Jardinero</span></a>
+    <a href="proveedores.html?cat=jardinero" class="cat-card"><div class="cat-icon">🍃</div><span>Jardinero</span></a>
   </div>
 </section>
 
@@ -68,7 +68,8 @@
   <h2 class="section-title"><em>Proveedores</em> de hoy</h2>
   <div class="providers-grid">
 
-    <div class="provider-card">
+    <!-- data-id debe coincidir con la clave en horarios.json -->
+    <div class="provider-card" data-id="carlos-mendoza">
       <div class="card-img-placeholder">⚡</div>
       <div class="card-badge">⭐ 4.9</div>
       <div class="card-body">
@@ -76,11 +77,11 @@
         <p>Instalaciones eléctricas residenciales y comerciales. +10 años de experiencia.</p>
         <div class="card-tags"><span class="tag">Electricista</span><span class="tag">Instalaciones</span></div>
         <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">48 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">Agenda ahora</button>
+        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="luis-rodriguez">
       <div class="card-img-placeholder">🔧</div>
       <div class="card-badge">⭐ 4.8</div>
       <div class="card-body">
@@ -88,11 +89,11 @@
         <p>Plomería en general, detección de fugas y reparación de tuberías.</p>
         <div class="card-tags"><span class="tag">Plomero</span><span class="tag">Fugas</span></div>
         <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">35 reseñas</span></div>
-        <button class="btn-agenda btn-dark">Agenda ahora</button>
+        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="ana-garcia">
       <div class="card-img-placeholder">🎨</div>
       <div class="card-badge">⭐ 5.0</div>
       <div class="card-body">
@@ -100,11 +101,11 @@
         <p>Pintura de interiores y exteriores. Acabados texturizados y decorativos.</p>
         <div class="card-tags"><span class="tag">Pintora</span><span class="tag">Decoración</span></div>
         <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">62 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">Agenda ahora</button>
+        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="martin-torres">
       <div class="card-img-placeholder">🧱</div>
       <div class="card-badge">⭐ 4.7</div>
       <div class="card-body">
@@ -112,11 +113,11 @@
         <p>Albañilería general, remodelaciones y construcción de cuartos adicionales.</p>
         <div class="card-tags"><span class="tag">Albañil</span><span class="tag">Remodelación</span></div>
         <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">29 reseñas</span></div>
-        <button class="btn-agenda btn-dark">Agenda ahora</button>
+        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="roberto-silva">
       <div class="card-img-placeholder">🪚</div>
       <div class="card-badge">⭐ 4.9</div>
       <div class="card-body">
@@ -124,11 +125,11 @@
         <p>Muebles a medida, closets, cocinas integrales y reparación de madera.</p>
         <div class="card-tags"><span class="tag">Carpintero</span><span class="tag">Muebles</span></div>
         <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">41 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">Agenda ahora</button>
+        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="pedro-herrera">
       <div class="card-img-placeholder">🪟</div>
       <div class="card-badge">⭐ 4.6</div>
       <div class="card-body">
@@ -136,22 +137,22 @@
         <p>Instalación de vidrios, espejos, ventanas y mamparas de baño.</p>
         <div class="card-tags"><span class="tag">Vidriero</span><span class="tag">Mamparas</span></div>
         <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">19 reseñas</span></div>
-        <button class="btn-agenda btn-dark">Agenda ahora</button>
+        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
       </div>
     </div>
 
-    <div class="provider-card">
+    <div class="provider-card" data-id="placeholder-jardinero">
       <div class="card-img-placeholder">🍃</div>
       <div class="card-badge">⭐ 4.6</div>
       <div class="card-body">
         <h3>PlaceHolder</h3>
-        <p>Jardineria, tala de árboles, etc...</p>
-        <div class="card-tags"><span class="tag">Jardinero</span><span class="tag">Jardin</span></div>
+        <p>Jardinería, tala de árboles, etc...</p>
+        <div class="card-tags"><span class="tag">Jardinero</span><span class="tag">Jardín</span></div>
         <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">19 reseñas</span></div>
-        <button class="btn-agenda btn-dark">Agenda ahora</button>
+        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
       </div>
     </div>
-	
+
   </div>
 </section>
 
@@ -203,11 +204,7 @@
         <li><a href="proveedores.html?cat=vidriero">Vidrería</a></li>
         <li><a href="proveedores.html?cat=pintor">Pintor</a></li>
         <li><a href="proveedores.html?cat=herrero">Herrero</a></li>
-		<li><a href="proveedores.html?cat=jardinero">Jardineria</a></li>
-		
-		
-    
-	
+        <li><a href="proveedores.html?cat=jardinero">Jardinería</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -224,7 +221,7 @@
   </div>
 </footer>
 
-<!-- MODAL -->
+<!-- MODAL — mismo sistema que proveedores.html -->
 <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiFondo(event)">
   <div class="modal-box">
     <div class="modal-body">
@@ -237,54 +234,107 @@
         <div class="modal-meta-row">⭐ <span id="modalRating"></span></div>
         <div class="modal-meta-row">📍 <span id="modalUbicacion"></span></div>
       </div>
-      <div class="modal-form">
-        <h3>Solicitar servicio</h3>
-        <form id="solicitudForm" action="https://formspree.io/f/mjybwdvb" method="POST">
-          <input type="hidden" name="proveedor" id="formProveedor">
-          <input type="hidden" name="categoria" id="formCategoria">
-          <div class="form-group">
-            <label for="fNombre">Nombre completo</label>
-            <input type="text" id="fNombre" name="nombre" placeholder="Tu nombre" required>
+
+      <!-- PASO 1: ELEGIR DÍA Y HORA -->
+      <div id="paso1">
+        <div class="modal-form">
+          <h3>📅 Selecciona día y hora</h3>
+
+          <div id="horariosLoading" style="text-align:center; padding:20px; color:var(--mid-gray); font-size:0.9rem;">
+            Cargando disponibilidad…
           </div>
-          <div class="form-group">
-            <label for="fTel">Teléfono</label>
-            <input type="tel" id="fTel" name="telefono" placeholder="Ej. 844 123 4567" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="fFecha">Fecha</label>
-              <input type="date" id="fFecha" name="fecha" required>
+
+          <div id="horariosContent" style="display:none;">
+            <p class="sched-label">Días disponibles</p>
+            <div class="dias-grid" id="diasGrid"></div>
+            <div id="horasSection" style="display:none;">
+              <p class="sched-label" id="horasLabel">Horarios disponibles</p>
+              <div class="horas-grid" id="horasGrid"></div>
             </div>
-            <div class="form-group">
-              <label for="fHora">Hora</label>
-              <input type="time" id="fHora" name="hora" required>
+            <div class="sched-selected" id="schedSelected" style="display:none;">
+              <span>✅</span>
+              <span id="schedSelectedText"></span>
+              <button onclick="limpiarSeleccion()">Cambiar</button>
+            </div>
+            <div id="sinHorarios" style="display:none; text-align:center; padding:20px; color:var(--mid-gray); font-size:0.88rem;">
+              😔 Este proveedor no tiene horarios disponibles por el momento.<br>
+              <small>Contáctanos directamente para coordinar.</small>
             </div>
           </div>
-          <div class="form-group">
-            <label for="fDireccion">Dirección del servicio</label>
-            <input type="text" id="fDireccion" name="direccion" placeholder="Calle, colonia, ciudad" required>
-          </div>
-          <div class="form-group">
-            <label for="fDesc">Descripción del trabajo</label>
-            <textarea id="fDesc" name="descripcion" placeholder="Describe brevemente qué necesitas..." required></textarea>
-          </div>
-          <button type="submit" class="btn-solicitar">Enviar solicitud por email</button>
-        </form>
-        <button class="btn-whatsapp" onclick="enviarWhatsApp()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          Enviar por WhatsApp
-        </button>
-        <div class="form-ok" id="formOk">
-          <span>✅</span>
-          <p>¡Solicitud enviada! Te contactaremos pronto para coordinar el servicio.</p>
+
+          <button class="btn-solicitar" id="btnSiguiente" onclick="irPaso2()" disabled>
+            Continuar →
+          </button>
         </div>
       </div>
+
+      <!-- PASO 2: DATOS DEL CLIENTE -->
+      <div id="paso2" style="display:none;">
+        <div class="modal-form">
+          <button class="btn-back" onclick="irPaso1()">← Cambiar horario</button>
+          <h3>📋 Tus datos de contacto</h3>
+
+          <form id="solicitudForm" action="https://formspree.io/f/mjybwdvb" method="POST">
+            <input type="hidden" name="proveedor" id="formProveedor">
+            <input type="hidden" name="categoria" id="formCategoria">
+            <input type="hidden" name="fecha_hora" id="formFechaHora">
+
+            <div class="form-group">
+              <label for="fNombre">Nombre completo</label>
+              <input type="text" id="fNombre" name="nombre" placeholder="Tu nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="fTel">Teléfono</label>
+              <input type="tel" id="fTel" name="telefono" placeholder="Ej. 844 123 4567" required>
+            </div>
+            <div class="form-group">
+              <label for="fDireccion">Dirección del servicio</label>
+              <input type="text" id="fDireccion" name="direccion" placeholder="Calle, colonia, ciudad" required>
+            </div>
+            <div class="form-group">
+              <label for="fDesc">Descripción del trabajo</label>
+              <textarea id="fDesc" name="descripcion" placeholder="Describe brevemente qué necesitas..." required></textarea>
+            </div>
+
+            <div class="sched-resumen" id="schedResumen"></div>
+
+            <button type="submit" class="btn-solicitar">Enviar solicitud por email</button>
+          </form>
+
+          <button class="btn-whatsapp" onclick="enviarWhatsApp()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Enviar por WhatsApp
+          </button>
+
+          <div class="form-ok" id="formOk">
+            <span>✅</span>
+            <p>¡Solicitud enviada! Te confirmaremos el horario a la brevedad.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <script>
-  const WHATSAPP_NUM = 'TUNUMERO'; // reemplaza cuando tengas tu número
+  const WHATSAPP_NUM = 'TUNUMERO';
+
+  const DIAS_NOMBRES = {
+    lun: 'Lunes', mar: 'Martes', mie: 'Miércoles',
+    jue: 'Jueves', vie: 'Viernes', sab: 'Sábado', dom: 'Domingo'
+  };
+
+  let todosLosHorarios = {};
+  let horarioActual    = {};
+  let diaSeleccionado  = null;
+  let horaSeleccionada = null;
+
+  // Cargar horarios.json al iniciar
+  fetch('horarios.json')
+    .then(res => res.json())
+    .then(data => { todosLosHorarios = data; })
+    .catch(() => console.warn('No se pudo cargar horarios.json'));
 
   function toggleMenu() {
     const menu = document.getElementById('mobileMenu');
@@ -293,16 +343,102 @@
   }
 
   function abrirModal(card) {
+    const id = card.dataset.id;
     document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
     document.getElementById('modalEspecialidad').textContent = card.querySelector('p').textContent;
     document.getElementById('modalRating').textContent       = card.querySelector('.card-stars').textContent.trim();
     document.getElementById('modalUbicacion').textContent    = 'Saltillo';
     document.getElementById('formProveedor').value           = card.querySelector('h3').textContent;
     document.getElementById('formCategoria').value           = card.querySelector('.tag').textContent.toLowerCase();
+
+    horarioActual    = todosLosHorarios[id] || {};
+    diaSeleccionado  = null;
+    horaSeleccionada = null;
+
+    document.getElementById('horariosLoading').style.display = 'none';
+    document.getElementById('horariosContent').style.display = 'block';
+
+    const tieneDias = Object.keys(horarioActual).length > 0;
+    document.getElementById('sinHorarios').style.display     = tieneDias ? 'none' : 'block';
+    document.getElementById('diasGrid').style.display        = tieneDias ? 'flex' : 'none';
+
+    renderDias();
+    irPaso1();
     document.getElementById('solicitudForm').reset();
     document.getElementById('formOk').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('activo');
     document.body.style.overflow = 'hidden';
+  }
+
+  function renderDias() {
+    const grid = document.getElementById('diasGrid');
+    grid.innerHTML = '';
+    Object.keys(horarioActual).forEach(dia => {
+      const btn = document.createElement('button');
+      btn.className   = 'dia-btn';
+      btn.textContent = DIAS_NOMBRES[dia];
+      btn.dataset.dia = dia;
+      btn.onclick     = () => seleccionarDia(dia);
+      grid.appendChild(btn);
+    });
+    document.getElementById('horasSection').style.display  = 'none';
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  function seleccionarDia(dia) {
+    diaSeleccionado  = dia;
+    horaSeleccionada = null;
+    document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.dia-btn[data-dia="${dia}"]`).classList.add('active');
+    renderHoras(dia);
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  function renderHoras(dia) {
+    const grid = document.getElementById('horasGrid');
+    grid.innerHTML = '';
+    document.getElementById('horasLabel').textContent = `Horarios disponibles — ${DIAS_NOMBRES[dia]}`;
+    horarioActual[dia].forEach(hora => {
+      const btn = document.createElement('button');
+      btn.className   = 'hora-btn';
+      btn.textContent = hora;
+      btn.onclick     = (e) => seleccionarHora(hora, dia, e.target);
+      grid.appendChild(btn);
+    });
+    document.getElementById('horasSection').style.display = 'block';
+  }
+
+  function seleccionarHora(hora, dia, btn) {
+    horaSeleccionada = hora;
+    document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const texto = `${DIAS_NOMBRES[dia]} a las ${hora}`;
+    document.getElementById('schedSelectedText').textContent = texto;
+    document.getElementById('schedSelected').style.display  = 'flex';
+    document.getElementById('formFechaHora').value          = texto;
+    document.getElementById('btnSiguiente').disabled        = false;
+    document.getElementById('schedResumen').innerHTML       =
+      `<span>📅</span> <strong>${DIAS_NOMBRES[dia]}</strong> a las <strong>${hora}</strong>`;
+  }
+
+  function limpiarSeleccion() {
+    horaSeleccionada = null;
+    document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('btnSiguiente').disabled       = true;
+  }
+
+  function irPaso1() {
+    document.getElementById('paso1').style.display = 'block';
+    document.getElementById('paso2').style.display = 'none';
+  }
+
+  function irPaso2() {
+    if (!diaSeleccionado || !horaSeleccionada) return;
+    document.getElementById('paso1').style.display = 'none';
+    document.getElementById('paso2').style.display = 'block';
   }
 
   function cerrarModal() {
@@ -335,23 +471,23 @@
 
   function enviarWhatsApp() {
     const proveedor = document.getElementById('formProveedor').value;
+    const fechaHora = document.getElementById('formFechaHora').value;
     const nombre    = document.getElementById('fNombre').value;
     const telefono  = document.getElementById('fTel').value;
-    const fecha     = document.getElementById('fFecha').value;
-    const hora      = document.getElementById('fHora').value;
     const direccion = document.getElementById('fDireccion').value;
     const desc      = document.getElementById('fDesc').value;
 
-    if (!nombre || !telefono || !fecha || !hora || !direccion || !desc) {
+    if (!nombre || !telefono || !direccion || !desc) {
       alert('Por favor llena todos los campos antes de enviar por WhatsApp.');
       return;
     }
 
-    const msg = `🔧 *Nueva solicitud de servicio*\n\n` +
+    const msg =
+      `🔧 *Nueva solicitud de servicio*\n\n` +
       `*Proveedor:* ${proveedor}\n` +
+      `*Horario solicitado:* ${fechaHora}\n` +
       `*Cliente:* ${nombre}\n` +
       `*Teléfono:* ${telefono}\n` +
-      `*Fecha:* ${fecha} a las ${hora}\n` +
       `*Dirección:* ${direccion}\n` +
       `*Descripción:* ${desc}`;
 
