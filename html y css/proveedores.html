@@ -281,17 +281,6 @@
         </div>
       </div>
 
-    <!-- PASO 3: CONFIRMACIÓN -->
-      <div id="paso3" style="display:none;">
-        <div class="confirm-box">
-          <div class="confirm-icon">✅</div>
-          <h3 class="confirm-title">¡Solicitud enviada!</h3>
-          <div class="confirm-resumen" id="confirmResumen"></div>
-          <p class="confirm-note">Te contactaremos pronto para confirmar tu reservación.</p>
-          <button class="confirm-close" onclick="cerrarModal()">Cerrar</button>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -495,12 +484,7 @@
       headers: { 'Accept': 'application/json' }
     });
     if (res.ok) {
-      const nombre    = document.getElementById('fNombre').value;
-      const proveedor = document.getElementById('formProveedor').value;
-      const fechaHora = document.getElementById('formFechaHora').value;
-      document.getElementById('confirmResumen').innerHTML =
-        `<strong>${nombre}</strong>, tu cita con <strong>${proveedor}</strong><br>fue agendada para el<br><strong>${fechaHora}</strong>`;
-      irPaso3();
+      document.getElementById('formOk').style.display = 'block';
       this.reset();
     } else {
       alert('Hubo un error. Intenta de nuevo.');
