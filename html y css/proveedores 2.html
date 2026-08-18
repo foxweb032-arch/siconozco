@@ -59,8 +59,6 @@
 <section class="prov-grid-section">
   <div class="prov-grid" id="provGrid">
 
-    <!-- data-id debe coincidir exactamente con la clave en horarios.json -->
-
     <div class="prov-card" data-cat="carpintero" data-id="carlos-rodriguez"
       data-name="carlos rodríguez muebles a medida y restauración">
       <div class="prov-card-img-wrap">
@@ -200,18 +198,38 @@
         <div class="modal-meta-row">💼 <span id="modalExperiencia"></span></div>
       </div>
 
-      <!-- PASO 1: ELEGIR DÍA Y HORA -->
+      <!-- PASO 1: CALENDARIO -->
       <div id="paso1">
         <div class="modal-form">
-          <h3>📅 Selecciona día y hora</h3>
+          <h3>📅 Selecciona fecha y hora</h3>
 
           <div id="horariosLoading" style="text-align:center; padding:20px; color:var(--mid-gray); font-size:0.9rem;">
             Cargando disponibilidad…
           </div>
 
           <div id="horariosContent" style="display:none;">
-            <p class="sched-label">Días disponibles</p>
-            <div class="dias-grid" id="diasGrid"></div>
+            <div class="cal-wrapper">
+              <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="cambiarMes(-1)">‹</button>
+                <h4 id="calTitulo"></h4>
+                <button class="cal-nav-btn" onclick="cambiarMes(1)">›</button>
+              </div>
+              <div class="cal-grid" id="calGrid"></div>
+              <div class="cal-leyenda">
+                <div class="cal-leyenda-item">
+                  <div class="cal-leyenda-dot disponible"></div>
+                  <span>Disponible</span>
+                </div>
+                <div class="cal-leyenda-item">
+                  <div class="cal-leyenda-dot seleccionado"></div>
+                  <span>Seleccionado</span>
+                </div>
+                <div class="cal-leyenda-item">
+                  <div class="cal-leyenda-dot no-disponible"></div>
+                  <span>No disponible</span>
+                </div>
+              </div>
+            </div>
 
             <div id="horasSection" style="display:none;">
               <p class="sched-label" id="horasLabel">Horarios disponibles</p>
@@ -222,11 +240,6 @@
               <span>✅</span>
               <span id="schedSelectedText"></span>
               <button onclick="limpiarSeleccion()">Cambiar</button>
-            </div>
-
-            <div id="sinHorarios" style="display:none; text-align:center; padding:20px; color:var(--mid-gray); font-size:0.88rem;">
-              😔 Este proveedor no tiene horarios disponibles por el momento.<br>
-              <small>Contáctanos directamente para coordinar.</small>
             </div>
           </div>
 
@@ -239,7 +252,7 @@
       <!-- PASO 2: DATOS DEL CLIENTE -->
       <div id="paso2" style="display:none;">
         <div class="modal-form">
-          <button class="btn-back" onclick="irPaso1()">← Cambiar horario</button>
+          <button class="btn-back" onclick="irPaso1()">← Cambiar fecha</button>
           <h3>📋 Tus datos de contacto</h3>
 
           <form id="solicitudForm" action="https://formspree.io/f/mjybwdvb" method="POST">
@@ -273,15 +286,10 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             Enviar por WhatsApp
           </button>
-
-          <div class="form-ok" id="formOk">
-            <span>✅</span>
-            <p>¡Solicitud enviada! Te confirmaremos el horario a la brevedad.</p>
-          </div>
         </div>
       </div>
 
-    <!-- PASO 3: CONFIRMACIÓN -->
+      <!-- PASO 3: CONFIRMACIÓN -->
       <div id="paso3" style="display:none;">
         <div class="confirm-box">
           <div class="confirm-icon">✅</div>
@@ -299,21 +307,20 @@
 <script>
   const WHATSAPP_NUM = 'TUNUMERO';
 
-  const DIAS_NOMBRES = {
-    lun: 'Lunes', mar: 'Martes', mie: 'Miércoles',
-    jue: 'Jueves', vie: 'Viernes', sab: 'Sábado', dom: 'Domingo'
-  };
+  const DIA_KEY  = { 0:'dom', 1:'lun', 2:'mar', 3:'mie', 4:'jue', 5:'vie', 6:'sab' };
+  const MESES    = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                    'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const DIA_HEADERS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-  // Horarios cargados desde el JSON
   let todosLosHorarios = {};
   let horarioActual    = {};
-  let diaSeleccionado  = null;
-  let horaSeleccionada = null;
+  let calFecha         = new Date();
+  let fechaSeleccionada = null;
+  let horaSeleccionada  = null;
 
-  // ── CARGAR JSON AL INICIAR ────────────
-  fetch('horarios.json')
-    .then(res => res.json())
-    .then(data => { todosLosHorarios = data; })
+  fetch('./horarios.json')
+    .then(r => r.json())
+    .then(d => { todosLosHorarios = d; })
     .catch(() => console.warn('No se pudo cargar horarios.json'));
 
   // ── MENU MÓVIL ────────────────────────
@@ -324,11 +331,11 @@
   }
 
   // ── FILTROS ───────────────────────────
-  const chips       = document.querySelectorAll('.filter-chip');
-  const cards       = document.querySelectorAll('.prov-card');
-  const searchInput = document.getElementById('searchInput');
+  const chips        = document.querySelectorAll('.filter-chip');
+  const cards        = document.querySelectorAll('.prov-card');
+  const searchInput  = document.getElementById('searchInput');
   const resultsCount = document.getElementById('resultsCount');
-  let activeFilter  = 'todos';
+  let activeFilter   = 'todos';
 
   function applyFilters() {
     const query = searchInput.value.trim().toLowerCase();
@@ -366,7 +373,6 @@
   // ── ABRIR MODAL ───────────────────────
   function abrirModal(card) {
     const id = card.dataset.id;
-
     document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
     document.getElementById('modalEspecialidad').textContent = card.querySelector('.specialty').textContent;
     document.getElementById('modalRating').textContent       = card.querySelector('.prov-rating').textContent.trim();
@@ -376,100 +382,152 @@
     document.getElementById('formProveedor').value           = card.querySelector('h3').textContent;
     document.getElementById('formCategoria').value           = card.dataset.cat;
 
-    // Cargar horarios desde el JSON
-    horarioActual    = todosLosHorarios[id] || {};
-    diaSeleccionado  = null;
-    horaSeleccionada = null;
+    horarioActual     = todosLosHorarios[id] || {};
+    fechaSeleccionada = null;
+    horaSeleccionada  = null;
+    calFecha          = new Date();
 
-    document.getElementById('horariosLoading').style.display  = 'none';
-    document.getElementById('horariosContent').style.display  = 'block';
+    document.getElementById('horariosLoading').style.display = 'none';
+    document.getElementById('horariosContent').style.display = 'block';
+    document.getElementById('horasSection').style.display    = 'none';
+    document.getElementById('schedSelected').style.display   = 'none';
+    document.getElementById('btnSiguiente').disabled         = true;
 
-    const tieneDias = Object.keys(horarioActual).length > 0;
-    document.getElementById('sinHorarios').style.display      = tieneDias ? 'none' : 'block';
-    document.getElementById('diasGrid').style.display         = tieneDias ? 'flex' : 'none';
-
-    renderDias();
+    renderCalendario();
     irPaso1();
-
     document.getElementById('solicitudForm').reset();
-    document.getElementById('formOk').style.display = 'none';
     document.getElementById('modalOverlay').classList.add('activo');
     document.body.style.overflow = 'hidden';
   }
 
-  // ── RENDER DÍAS ───────────────────────
-  function renderDias() {
-    const grid = document.getElementById('diasGrid');
+  // ── CALENDARIO ────────────────────────
+  function renderCalendario() {
+    const hoy   = new Date(); hoy.setHours(0,0,0,0);
+    const anio  = calFecha.getFullYear();
+    const mes   = calFecha.getMonth();
+    document.getElementById('calTitulo').textContent = `${MESES[mes]} ${anio}`;
+
+    const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-    Object.keys(horarioActual).forEach(dia => {
-      const btn = document.createElement('button');
-      btn.className    = 'dia-btn';
-      btn.textContent  = DIAS_NOMBRES[dia];
-      btn.dataset.dia  = dia;
-      btn.onclick      = () => seleccionarDia(dia);
-      grid.appendChild(btn);
+
+    DIA_HEADERS.forEach(d => {
+      const h = document.createElement('div');
+      h.className = 'cal-day-header';
+      h.textContent = d;
+      grid.appendChild(h);
     });
+
+    const primerDia = new Date(anio, mes, 1).getDay();
+    const totalDias = new Date(anio, mes + 1, 0).getDate();
+
+    for (let i = 0; i < primerDia; i++) {
+      const v = document.createElement('div');
+      v.className = 'cal-day vacio';
+      grid.appendChild(v);
+    }
+
+    for (let dia = 1; dia <= totalDias; dia++) {
+      const fecha     = new Date(anio, mes, dia);
+      const key       = DIA_KEY[fecha.getDay()];
+      const esHoy     = fecha.getTime() === hoy.getTime();
+      const esPasado  = fecha < hoy;
+      const disponible = !esPasado && horarioActual[key] && horarioActual[key].length > 0;
+
+      const cell = document.createElement('div');
+      cell.textContent = dia;
+      cell.classList.add('cal-day');
+
+      if (esPasado) {
+        cell.classList.add('pasado');
+      } else if (!disponible) {
+        cell.classList.add('no-disponible');
+      } else {
+        cell.classList.add('disponible');
+        if (esHoy) cell.classList.add('hoy');
+        if (fechaSeleccionada && fecha.getTime() === fechaSeleccionada.getTime()) {
+          cell.classList.remove('disponible');
+          cell.classList.add('seleccionado');
+        }
+        cell.onclick = () => seleccionarFecha(fecha, key);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function cambiarMes(dir) {
+    calFecha = new Date(calFecha.getFullYear(), calFecha.getMonth() + dir, 1);
+    fechaSeleccionada = null;
+    horaSeleccionada  = null;
     document.getElementById('horasSection').style.display  = 'none';
     document.getElementById('schedSelected').style.display = 'none';
     document.getElementById('btnSiguiente').disabled       = true;
+    renderCalendario();
   }
 
-  // ── SELECCIONAR DÍA ───────────────────
-  function seleccionarDia(dia) {
-    diaSeleccionado  = dia;
-    horaSeleccionada = null;
-    document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.dia-btn[data-dia="${dia}"]`).classList.add('active');
-    renderHoras(dia);
+  function seleccionarFecha(fecha, key) {
+    fechaSeleccionada = fecha;
+    horaSeleccionada  = null;
     document.getElementById('schedSelected').style.display = 'none';
     document.getElementById('btnSiguiente').disabled       = true;
+    renderCalendario();
+    renderHoras(key, fecha);
   }
 
-  // ── RENDER HORAS ──────────────────────
-  function renderHoras(dia) {
-    const grid = document.getElementById('horasGrid');
+  function renderHoras(key, fecha) {
+    const opciones = { weekday:'long', day:'numeric', month:'long' };
+    const fechaStr = fecha.toLocaleDateString('es-MX', opciones);
+    const grid     = document.getElementById('horasGrid');
     grid.innerHTML = '';
-    document.getElementById('horasLabel').textContent = `Horarios disponibles — ${DIAS_NOMBRES[dia]}`;
-    horarioActual[dia].forEach(hora => {
-      const btn   = document.createElement('button');
+    document.getElementById('horasLabel').textContent = `Horarios — ${fechaStr}`;
+    horarioActual[key].forEach(hora => {
+      const btn = document.createElement('button');
       btn.className   = 'hora-btn';
       btn.textContent = hora;
-      btn.onclick     = (e) => seleccionarHora(hora, dia, e.target);
+      btn.onclick     = (e) => seleccionarHora(hora, fechaStr, e.target);
       grid.appendChild(btn);
     });
     document.getElementById('horasSection').style.display = 'block';
   }
 
-  // ── SELECCIONAR HORA ──────────────────
-  function seleccionarHora(hora, dia, btn) {
+  function seleccionarHora(hora, fechaStr, btn) {
     horaSeleccionada = hora;
     document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const texto = `${DIAS_NOMBRES[dia]} a las ${hora}`;
+    const texto = `${fechaStr} a las ${hora}`;
     document.getElementById('schedSelectedText').textContent = texto;
     document.getElementById('schedSelected').style.display  = 'flex';
     document.getElementById('formFechaHora').value          = texto;
     document.getElementById('btnSiguiente').disabled        = false;
     document.getElementById('schedResumen').innerHTML       =
-      `<span>📅</span> <strong>${DIAS_NOMBRES[dia]}</strong> a las <strong>${hora}</strong>`;
+      `<span>📅</span> <strong>${fechaStr}</strong> a las <strong>${hora}</strong>`;
   }
 
   function limpiarSeleccion() {
-    horaSeleccionada = null;
+    horaSeleccionada  = null;
+    fechaSeleccionada = null;
     document.querySelectorAll('.hora-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('schedSelected').style.display = 'none';
+    document.getElementById('horasSection').style.display  = 'none';
     document.getElementById('btnSiguiente').disabled       = true;
+    renderCalendario();
   }
 
   // ── PASOS ─────────────────────────────
   function irPaso1() {
     document.getElementById('paso1').style.display = 'block';
     document.getElementById('paso2').style.display = 'none';
+    document.getElementById('paso3').style.display = 'none';
   }
   function irPaso2() {
-    if (!diaSeleccionado || !horaSeleccionada) return;
+    if (!fechaSeleccionada || !horaSeleccionada) return;
     document.getElementById('paso1').style.display = 'none';
     document.getElementById('paso2').style.display = 'block';
+    document.getElementById('paso3').style.display = 'none';
+  }
+  function irPaso3() {
+    document.getElementById('paso1').style.display = 'none';
+    document.getElementById('paso2').style.display = 'none';
+    document.getElementById('paso3').style.display = 'block';
   }
 
   // ── CERRAR MODAL ──────────────────────
@@ -481,7 +539,6 @@
     if (e.target === document.getElementById('modalOverlay')) cerrarModal();
   }
 
-  // ── CLICK EN CARD ─────────────────────
   document.querySelectorAll('.prov-card').forEach(card => {
     card.addEventListener('click', () => abrirModal(card));
   });
@@ -489,15 +546,15 @@
   // ── FORMSPREE ─────────────────────────
   document.getElementById('solicitudForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const nombre    = document.getElementById('fNombre').value;
+    const proveedor = document.getElementById('formProveedor').value;
+    const fechaHora = document.getElementById('formFechaHora').value;
     const res = await fetch(this.action, {
       method: 'POST',
       body: new FormData(this),
       headers: { 'Accept': 'application/json' }
     });
     if (res.ok) {
-      const nombre    = document.getElementById('fNombre').value;
-      const proveedor = document.getElementById('formProveedor').value;
-      const fechaHora = document.getElementById('formFechaHora').value;
       document.getElementById('confirmResumen').innerHTML =
         `<strong>${nombre}</strong>, tu cita con <strong>${proveedor}</strong><br>fue agendada para el<br><strong>${fechaHora}</strong>`;
       irPaso3();
@@ -524,7 +581,7 @@
     const msg =
       `🔧 *Nueva solicitud de servicio*\n\n` +
       `*Proveedor:* ${proveedor}\n` +
-      `*Horario solicitado:* ${fechaHora}\n` +
+      `*Fecha y hora:* ${fechaHora}\n` +
       `*Cliente:* ${nombre}\n` +
       `*Teléfono:* ${telefono}\n` +
       `*Dirección:* ${direccion}\n` +
@@ -535,13 +592,8 @@
 
   // ── URL PARAMS ────────────────────────
   const params   = new URLSearchParams(window.location.search);
-  const catParam    = params.get('cat');
-  const buscarParam = params.get('buscar');
-
-  if (buscarParam) {
-    searchInput.value = buscarParam;
-    applyFilters();
-  } else if (catParam) {
+  const catParam = params.get('cat');
+  if (catParam) {
     const matchingChip = document.querySelector(`.filter-chip[data-filter="${catParam}"]`);
     if (matchingChip) matchingChip.click();
   } else {

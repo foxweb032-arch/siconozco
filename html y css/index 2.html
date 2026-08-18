@@ -221,7 +221,7 @@
   </div>
 </footer>
 
-<!-- MODAL — mismo sistema que proveedores.html -->
+
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="cerrarModalSiFondo(event)">
   <div class="modal-box">
@@ -304,7 +304,7 @@
           <button class="btn-back" onclick="irPaso1()">← Cambiar fecha</button>
           <h3>📋 Tus datos de contacto</h3>
  
-          <form id="solicitudForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+          <form id="solicitudForm" action="https://formspree.io/f/mjybwdvb" method="POST">
             <input type="hidden" name="proveedor" id="formProveedor">
             <input type="hidden" name="categoria" id="formCategoria">
             <input type="hidden" name="fecha_hora" id="formFechaHora">
@@ -336,13 +336,22 @@
             Enviar por WhatsApp
           </button>
  
-          <div class="form-ok" id="formOk">
-            <span>✅</span>
-            <p>¡Solicitud enviada! Te confirmaremos la fecha a la brevedad.</p>
+          <div class="form-ok" id="formOk" style="display:none;">
           </div>
         </div>
       </div>
  
+    <!-- PASO 3: CONFIRMACIÓN -->
+      <div id="paso3" style="display:none;">
+        <div class="confirm-box">
+          <div class="confirm-icon">✅</div>
+          <h3 class="confirm-title">¡Solicitud enviada!</h3>
+          <div class="confirm-resumen" id="confirmResumen"></div>
+          <p class="confirm-note">Te contactaremos pronto para confirmar tu reservación.</p>
+          <button class="confirm-close" onclick="cerrarModal()">Cerrar</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -369,18 +378,6 @@
     .catch(() => console.warn('No se pudo cargar horarios.json'));
  
   // ── MENU MÓVIL ──────────────────────
-  // ── BÚSQUEDA HERO ───────────────────
-  document.querySelector('.search-bar button').addEventListener('click', buscarHero);
-  document.querySelector('.search-bar input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') buscarHero();
-  });
-  function buscarHero() {
-    const query = document.querySelector('.search-bar input').value.trim();
-    if (query) {
-      window.location.href = `proveedores.html?buscar=${encodeURIComponent(query)}`;
-    }
-  }
-
   function toggleMenu() {
     const menu = document.getElementById('mobileMenu');
     menu.classList.toggle('open');
@@ -573,6 +570,10 @@
     document.getElementById('paso1').style.display = 'none';
     document.getElementById('paso2').style.display = 'block';
   }
+  function irPaso3() {
+    document.getElementById('paso2').style.display = 'none';
+    document.getElementById('paso3').style.display = 'block';
+  }
  
   // ── CERRAR MODAL ─────────────────────
   function cerrarModal() {
@@ -598,7 +599,12 @@
       headers: { 'Accept': 'application/json' }
     });
     if (res.ok) {
-      document.getElementById('formOk').style.display = 'block';
+      const nombre    = document.getElementById('fNombre').value;
+      const proveedor = document.getElementById('formProveedor').value;
+      const fechaHora = document.getElementById('formFechaHora').value;
+      document.getElementById('confirmResumen').innerHTML =
+        `<strong>${nombre}</strong>, tu cita con <strong>${proveedor}</strong><br>fue agendada para el<br><strong>${fechaHora}</strong>`;
+      irPaso3();
       this.reset();
     } else {
       alert('Hubo un error. Intenta de nuevo.');
@@ -638,15 +644,12 @@
     const resultsCount = document.getElementById('resultsCount');
     let activeFilter   = 'todos';
  
-  function applyFilters() {
-  const query = searchInput.value.trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  let visibleCount = 0;
-  cards.forEach(card => {
-    const matchCat    = activeFilter === 'todos' || card.dataset.cat === activeFilter;
-    const cardText    = card.dataset.name.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const matchSearch = query === '' || cardText.includes(query);
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+      document.querySelectorAll('.prov-card').forEach(card => {
+        const matchCat    = activeFilter === 'todos' || card.dataset.cat === activeFilter;
+        const matchSearch = card.dataset.name.includes(query);
         const show        = matchCat && matchSearch;
         card.classList.toggle('visible', show);
         if (show) visibleCount++;
