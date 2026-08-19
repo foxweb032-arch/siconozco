@@ -6,6 +6,7 @@
 <title>SiConozco – Encuentra tu proveedor</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="siconozco.css">
+<script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -385,7 +386,7 @@
   }
  
   // ── ABRIR MODAL ─────────────────────
-  async function abrirModal(card) {
+  function abrirModal(card) {
     const id = card.dataset.id;
  
     // Datos del proveedor
@@ -417,7 +418,9 @@
     document.getElementById('horariosLoading').style.display = 'none';
     document.getElementById('horariosContent').style.display = 'block';
  
-
+    const tieneDias = Object.keys(horarioActual).length > 0;
+    document.getElementById('sinHorarios').style.display    = tieneDias ? 'none' : 'block';
+    document.getElementById('calGrid').style.display        = tieneDias ? 'grid' : 'none';
  
     renderCalendario();
     irPaso1();
@@ -678,6 +681,17 @@
       applyFilters();
     }
   }
+
+  // Exponer funciones al window para que el HTML pueda accederlas
+  window.cerrarModal        = cerrarModal;
+  window.cerrarModalSiFondo = cerrarModalSiFondo;
+  window.cambiarMes         = cambiarMes;
+  window.limpiarSeleccion   = limpiarSeleccion;
+  window.irPaso1            = irPaso1;
+  window.irPaso2            = irPaso2;
+  window.irPaso3            = irPaso3;
+  window.enviarWhatsApp     = enviarWhatsApp;
+  window.toggleMenu         = toggleMenu;
 </script>
 </body>
 </html>

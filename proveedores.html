@@ -6,6 +6,7 @@
 <title>Proveedores – SiConozco</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="siconozco.css">
+<script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -296,9 +297,7 @@
   </div>
 </div>
 
-<script type="module">
-  import { cargarHorarios } from './firebase.js';
-
+<script>
   const WHATSAPP_NUM = 'TUNUMERO';
 
   const DIAS_NOMBRES = {
@@ -363,7 +362,7 @@
   searchInput.addEventListener('input', applyFilters);
 
   // ── ABRIR MODAL ───────────────────────
-  async function abrirModal(card) {
+  function abrirModal(card) {
     const id = card.dataset.id;
 
     document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
