@@ -1,27 +1,19 @@
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
-    authDomain: "siconozco-ab496.firebaseapp.com",
-    projectId: "siconozco-ab496",
-    storageBucket: "siconozco-ab496.firebasestorage.app",
-    messagingSenderId: "983709453039",
-    appId: "1:983709453039:web:2b6d18c68b284bcdc7691a",
-    measurementId: "G-0NREY720R5"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
+  authDomain: "siconozco-ab496.firebaseapp.com",
+  projectId: "siconozco-ab496",
+  storageBucket: "siconozco-ab496.firebasestorage.app",
+  messagingSenderId: "983709453039",
+  appId: "1:983709453039:web:2b6d18c68b284bcdc7691a",
+  measurementId: "G-0NREY720R5"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  
-  // ── CARGAR HORARIOS DESDE FIRESTORE ───
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
 async function cargarHorarios(proveedorId) {
   try {
     const docRef  = doc(db, 'horarios', proveedorId);
@@ -39,4 +31,3 @@ async function cargarHorarios(proveedorId) {
 }
 
 export { db, cargarHorarios };
-</script>
