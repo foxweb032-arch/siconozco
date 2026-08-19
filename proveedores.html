@@ -532,7 +532,7 @@
   }
 
   // ── URL PARAMS ────────────────────────
-  const params   = new URLSearchParams(window.location.search);
+  const params      = new URLSearchParams(window.location.search);
   const catParam    = params.get('cat');
   const buscarParam = params.get('buscar');
 
@@ -545,6 +545,18 @@
   } else {
     applyFilters();
   }
+
+  // ── EXPONER FUNCIONES AL WINDOW ───────
+  window.cerrarModal        = cerrarModal;
+  window.cerrarModalSiFondo = cerrarModalSiFondo;
+  window.cambiarMes         = cambiarMes;
+  window.limpiarSeleccion   = limpiarSeleccion;
+  window.irPaso1            = irPaso1;
+  window.irPaso2            = irPaso2;
+  window.irPaso3            = irPaso3;
+  window.enviarWhatsApp     = enviarWhatsApp;
+  window.toggleMenu         = toggleMenu;
+  window.buscarHero         = buscarHero;
 </script>
 
 </body>
