@@ -298,8 +298,8 @@
 </div>
 
 <script type="module">
-  // ── CARGAR JSON AL INICIAR ────────────
   import { cargarHorarios } from './firebase.js';
+
   const WHATSAPP_NUM = 'TUNUMERO';
 
   const DIAS_NOMBRES = {
@@ -312,9 +312,6 @@
   let horarioActual    = {};
   let diaSeleccionado  = null;
   let horaSeleccionada = null;
-
-  // ── CARGAR JSON AL INICIAR ────────────
-  import { cargarHorarios } from './firebase.js';
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
