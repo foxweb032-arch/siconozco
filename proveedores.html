@@ -361,7 +361,7 @@
   searchInput.addEventListener('input', applyFilters);
 
   // ── ABRIR MODAL ───────────────────────
-  function abrirModal(card) {
+  async function abrirModal(card) {
     const id = card.dataset.id;
 
     document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
