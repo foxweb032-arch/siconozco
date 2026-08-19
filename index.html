@@ -349,6 +349,8 @@
 </div>
 
 <script type="module">
+  import { cargarHorarios } from './firebase.js';
+
   const WHATSAPP_NUM = 'TUNUMERO';
  
   // Mapeo día de semana JS (0=dom) → clave del JSON
@@ -363,8 +365,6 @@
   let fechaSeleccionada = null;        // Date seleccionada
   let horaSeleccionada  = null;
  
-  // Cargar horarios.json
- import { cargarHorarios } from './firebase.js';
  
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────
