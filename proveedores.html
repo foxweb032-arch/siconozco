@@ -6,6 +6,7 @@
 <title>Proveedores – SiConozco</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="siconozco.css">
+<script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -311,10 +312,7 @@
   let horaSeleccionada = null;
 
   // ── CARGAR JSON AL INICIAR ────────────
-  fetch('horarios.json')
-    .then(res => res.json())
-    .then(data => { todosLosHorarios = data; })
-    .catch(() => console.warn('No se pudo cargar horarios.json'));
+  import { cargarHorarios } from './firebase.js';
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
@@ -377,7 +375,7 @@
     document.getElementById('formCategoria').value           = card.dataset.cat;
 
     // Cargar horarios desde el JSON
-    horarioActual    = todosLosHorarios[id] || {};
+	horarioActual = await cargarHorarios(id);
     diaSeleccionado  = null;
     horaSeleccionada = null;
 

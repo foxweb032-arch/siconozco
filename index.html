@@ -6,6 +6,7 @@
 <title>SiConozco – Encuentra tu proveedor</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="siconozco.css">
+<script type="module" src="firebase.js"></script>
 </head>
 <body>
 
@@ -363,10 +364,7 @@
   let horaSeleccionada  = null;
  
   // Cargar horarios.json
-  fetch('horarios.json')
-    .then(r => r.json())
-    .then(d => { todosLosHorarios = d; })
-    .catch(() => console.warn('No se pudo cargar horarios.json'));
+ import { cargarHorarios } from './firebase.js';
  
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────
@@ -412,7 +410,7 @@
     else        { modalImg.style.display = 'none'; }
  
     // Horarios
-    horarioActual     = todosLosHorarios[id] || {};
+    horarioActual = await cargarHorarios(id);
     fechaSeleccionada = null;
     horaSeleccionada  = null;
     calFecha          = new Date();
