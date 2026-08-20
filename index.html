@@ -571,7 +571,11 @@
     document.getElementById('paso1').style.display = 'none';
     document.getElementById('paso2').style.display = 'block';
   }
- 
+function irPaso3() {
+  document.getElementById('paso1').style.display = 'none';
+  document.getElementById('paso2').style.display = 'none';
+  document.getElementById('paso3').style.display = 'block';
+} 
   // ── CERRAR MODAL ─────────────────────
   function cerrarModal() {
     document.getElementById('modalOverlay').classList.remove('activo');
