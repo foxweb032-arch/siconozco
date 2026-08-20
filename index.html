@@ -570,21 +570,17 @@
   }
  
   // ── PASOS ────────────────────────────
-  function irPaso1() {
-    document.getElementById('paso1').style.display = 'block';
-    document.getElementById('paso2').style.display = 'none';
+  function mostrarPaso(n) {
+    ['paso1','paso2','paso3'].forEach((id, i) => {
+      document.getElementById(id).style.display = (i + 1 === n) ? 'block' : 'none';
+    });
   }
+  function irPaso1() { mostrarPaso(1); }
   function irPaso2() {
     if (!fechaSeleccionada || !horaSeleccionada) return;
-    document.getElementById('paso1').style.display = 'none';
-    document.getElementById('paso2').style.display = 'block';
+    mostrarPaso(2);
   }
-
-  function irPaso3() {
-    document.getElementById('paso1').style.display = 'none';
-    document.getElementById('paso2').style.display = 'none';
-    document.getElementById('paso3').style.display = 'block';
-  }
+  function irPaso3() { mostrarPaso(3); }
 	
   // ── CERRAR MODAL ─────────────────────
   function cerrarModal() {
