@@ -610,7 +610,12 @@
       headers: { 'Accept': 'application/json' }
     });
     if (res.ok) {
-      document.getElementById('formOk').style.display = 'block';
+      const nombre    = document.getElementById('fNombre').value;
+      const proveedor = document.getElementById('formProveedor').value;
+      const fechaHora = document.getElementById('formFechaHora').value;
+      document.getElementById('confirmResumen').innerHTML =
+        `<strong>${nombre}</strong>, tu cita con <strong>${proveedor}</strong><br>fue agendada para el<br><strong>${fechaHora}</strong>`;
+      irPaso3();
       this.reset();
     } else {
       alert('Hubo un error. Intenta de nuevo.');
