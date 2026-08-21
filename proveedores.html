@@ -59,130 +59,12 @@
 
 <section class="prov-grid-section">
   <div class="prov-grid" id="provGrid">
-
-    <!-- data-id debe coincidir exactamente con la clave en horarios.json -->
-
-    <div class="prov-card" data-cat="carpintero" data-id="carlos-rodriguez"
-      data-name="carlos rodríguez muebles a medida y restauración">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=500&q=80" alt="Carpintero">
-        <span class="prov-card-badge">Carpintero</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>Carlos Rodríguez</h3>
-          <div class="prov-rating"><span class="star">★</span> 4.8 <span class="count">(127)</span></div>
-        </div>
-        <p class="specialty">Muebles a medida y restauración</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. República Oriente, Saltillo</div>
-          <div class="prov-meta-row">💼 12 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
+    <div class="prov-loading" id="provLoading" style="grid-column:1/-1; text-align:center; padding:40px; color:var(--mid-gray);">
+      Cargando proveedores…
     </div>
-
-    <div class="prov-card" data-cat="herrero" data-id="miguel-torres"
-      data-name="miguel ángel torres portones rejas y estructuras metálicas">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=500&q=80" alt="Herrero">
-        <span class="prov-card-badge">Herrero</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>Miguel Ángel Torres</h3>
-          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(94)</span></div>
-        </div>
-        <p class="specialty">Portones, rejas y estructuras metálicas</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. Los Pinos, Saltillo</div>
-          <div class="prov-meta-row">💼 15 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
-    </div>
-
-    <div class="prov-card" data-cat="albanil" data-id="jose-martinez"
-      data-name="josé luis martínez construcción y remodelación">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1581094288338-2314dddb7ece?w=500&q=80" alt="Albañil">
-        <span class="prov-card-badge">Albañil</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>José Luis Martínez</h3>
-          <div class="prov-rating"><span class="star">★</span> 4.7 <span class="count">(156)</span></div>
-        </div>
-        <p class="specialty">Construcción y remodelación</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. Valle de las Flores, Saltillo</div>
-          <div class="prov-meta-row">💼 18 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
-    </div>
-
-    <div class="prov-card" data-cat="electricista" data-id="ana-gomez"
-      data-name="ana sofía gómez instalaciones eléctricas residenciales">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=500&q=80" alt="Electricista">
-        <span class="prov-card-badge">Electricista</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>Ana Sofía Gómez</h3>
-          <div class="prov-rating"><span class="star">★</span> 4.9 <span class="count">(81)</span></div>
-        </div>
-        <p class="specialty">Instalaciones eléctricas residenciales</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. Centro, Saltillo</div>
-          <div class="prov-meta-row">💼 9 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
-    </div>
-
-    <div class="prov-card" data-cat="plomero" data-id="luis-hernandez"
-      data-name="luis hernández plomería general y fugas">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1607472829322-15c5c7c1bcfd?w=500&q=80" alt="Plomero">
-        <span class="prov-card-badge">Plomero</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>Luis Hernández</h3>
-          <div class="prov-rating"><span class="star">★</span> 4.6 <span class="count">(58)</span></div>
-        </div>
-        <p class="specialty">Plomería general y reparación de fugas</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. Saltillo 400, Saltillo</div>
-          <div class="prov-meta-row">💼 11 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
-    </div>
-
-    <div class="prov-card" data-cat="pintor" data-id="diana-flores"
-      data-name="diana flores pintura interior y exterior">
-      <div class="prov-card-img-wrap">
-        <img class="prov-card-img" src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=500&q=80" alt="Pintor">
-        <span class="prov-card-badge">Pintor</span>
-      </div>
-      <div class="prov-card-body">
-        <div class="prov-card-top">
-          <h3>Diana Flores</h3>
-          <div class="prov-rating"><span class="star">★</span> 5.0 <span class="count">(112)</span></div>
-        </div>
-        <p class="specialty">Pintura interior y exterior, acabados finos</p>
-        <div class="prov-meta">
-          <div class="prov-meta-row">📍 Col. Mirasierra, Saltillo</div>
-          <div class="prov-meta-row">💼 7 años de experiencia</div>
-        </div>
-        <button class="prov-card-cta">Solicitar servicio</button>
-      </div>
-    </div>
-
   </div>
+</section>
+
 </section>
 
 <!-- MODAL -->
@@ -313,7 +195,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios } from './firebase.js';
+  import { cargarHorarios, cargarProveedores } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
 
@@ -326,6 +208,59 @@
   let calFecha          = new Date();
   let fechaSeleccionada = null;
   let horaSeleccionada  = null;
+
+  // ── RENDER PROVEEDORES DESDE FIRESTORE ──
+  const EMOJIS_CAT = {
+    carpintero: '🪚', herrero: '⚒️', albanil: '🧱',
+    electricista: '⚡', plomero: '🔧', pintor: '🎨',
+    vidriero: '🪟', jardinero: '🍃'
+  };
+
+  async function renderProveedores() {
+    const proveedores = await cargarProveedores();
+    const grid        = document.getElementById('provGrid');
+    document.getElementById('provLoading').remove();
+
+    if (proveedores.length === 0) {
+      grid.innerHTML = '<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>No hay proveedores disponibles por el momento.</div>';
+      return;
+    }
+
+    proveedores.forEach(p => {
+      const emoji = EMOJIS_CAT[p.categoria] || '🔧';
+      const card  = document.createElement('div');
+      card.className        = 'prov-card visible';
+      card.dataset.cat      = p.categoria || '';
+      card.dataset.id       = p.id;
+      card.dataset.name     = `${p.nombre} ${p.especialidad}`.toLowerCase();
+
+      card.innerHTML = `
+        <div class="prov-card-img-wrap">
+          <div class="prov-card-img-placeholder" style="width:100%;height:170px;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);display:flex;align-items:center;justify-content:center;font-size:3rem;">${emoji}</div>
+          <span class="prov-card-badge">${p.categoria ? p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : ''}</span>
+        </div>
+        <div class="prov-card-body">
+          <div class="prov-card-top">
+            <h3>${p.nombre}</h3>
+            <div class="prov-rating"><span class="star">★</span> <span class="count">Sin reseñas</span></div>
+          </div>
+          <p class="specialty">${p.especialidad}</p>
+          <div class="prov-meta">
+            <div class="prov-meta-row">📍 ${p.ubicacion}</div>
+            <div class="prov-meta-row">💼 ${p.experiencia} de experiencia</div>
+          </div>
+          <button class="prov-card-cta">Solicitar servicio</button>
+        </div>`;
+
+      card.addEventListener('click', () => abrirModal(card));
+      grid.appendChild(card);
+    });
+
+    // Re-aplicar filtros después de cargar
+    applyFilters();
+  }
+
+  renderProveedores();
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {

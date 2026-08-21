@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
@@ -14,6 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
+// ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
   try {
     const docRef  = doc(db, 'horarios', proveedorId);
@@ -30,4 +31,16 @@ async function cargarHorarios(proveedorId) {
   }
 }
 
-export { db, cargarHorarios };
+// ── CARGAR PROVEEDORES APROBADOS ──────
+async function cargarProveedores() {
+  try {
+    const q        = query(collection(db, 'proveedores'), where('estado', '==', 'aprobado'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error('Error cargando proveedores:', error);
+    return [];
+  }
+}
+
+export { db, cargarHorarios, cargarProveedores };
