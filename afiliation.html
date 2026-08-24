@@ -64,11 +64,7 @@
         </div>
       </div>
 
-      <div class="afil-group">
-        <label for="aDireccion">Dirección <span>*</span></label>
-        <input type="text" id="aDireccion" placeholder="Calle, colonia, ciudad">
-        <span class="afil-error-msg" id="errDireccion">Ingresa tu dirección</span>
-      </div>
+ 
 
       <div class="afil-group">
         <label for="aExperiencia">Años de experiencia <span>*</span></label>
@@ -106,9 +102,9 @@
       </div>
 
       <div class="afil-group">
-        <label for="aUbicacion">Colonia / Ciudad <span>*</span></label>
+        <label for="aUbicacion">Dirección <span>*</span></label>
         <input type="text" id="aUbicacion" placeholder="Ej. Col. Centro, Saltillo">
-        <span class="afil-error-msg" id="errUbicacion">Ingresa tu ubicación</span>
+        <span class="afil-error-msg" id="errUbicacion">Ingresa tu dirección</span>
       </div>
 
       <div class="afil-group">
@@ -332,7 +328,6 @@
     valido = validar('aTel',          'errTel',          tel.length > 6)             && valido;
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
     valido = validar('aDireccion',    'errDireccion',    direccion.length > 3)       && valido;
-    valido = validar('aExperiencia',  'errExperiencia',  experiencia.length > 0)     && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
     valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
@@ -363,7 +358,6 @@
         nombre,
         telefono:    tel,
         email,
-        direccion,
         experiencia,
         categoria:   profesion,
         especialidad,
