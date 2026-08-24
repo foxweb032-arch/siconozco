@@ -30,7 +30,7 @@
   <a href="index.html" onclick="toggleMenu()">Inicio</a>
   <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
   <a href="#" onclick="toggleMenu()">Categorías</a>
-  <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <a href="afiliation.html" onclick="toggleMenu()">Publicar servicio</a>
   <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
 </div>
 
@@ -70,6 +70,12 @@
         <span class="afil-error-msg" id="errDireccion">Ingresa tu dirección</span>
       </div>
 
+      <div class="afil-group">
+        <label for="aExperiencia">Años de experiencia <span>*</span></label>
+        <input type="text" id="aExperiencia" placeholder="Ej. 5 años">
+        <span class="afil-error-msg" id="errExperiencia">Ingresa tu experiencia</span>
+      </div>
+
       <div class="afil-divider"></div>
       <p class="afil-section-title">Información profesional</p>
 
@@ -97,6 +103,12 @@
           <input type="text" id="aEspecialidad" placeholder="Ej. Instalaciones eléctricas">
           <span class="afil-error-msg" id="errEspecialidad">Ingresa tu especialidad</span>
         </div>
+      </div>
+
+      <div class="afil-group">
+        <label for="aUbicacion">Colonia / Ciudad <span>*</span></label>
+        <input type="text" id="aUbicacion" placeholder="Ej. Col. Centro, Saltillo">
+        <span class="afil-error-msg" id="errUbicacion">Ingresa tu ubicación</span>
       </div>
 
       <div class="afil-group">
@@ -182,13 +194,9 @@
     <div class="terms-modal-body">
       <h4>1. Acuerdo general</h4>
       <p>Al registrarte como proveedor en SiConozco, aceptas cumplir con los presentes Términos y Condiciones. SiConozco actúa como intermediario entre clientes y proveedores de servicios. No somos empleadores ni contratistas directos.</p>
-
       <h4>2. Comisión por servicio</h4>
-      <div class="terms-modal-highlight">
-        💰 SiConozco cobra una comisión del 13% sobre el valor total de cada servicio contratado a través de la plataforma.
-      </div>
+      <div class="terms-modal-highlight">💰 SiConozco cobra una comisión del 13% sobre el valor total de cada servicio contratado a través de la plataforma.</div>
       <p>Esta comisión aplica a todos los trabajos originados mediante solicitudes recibidas a través de SiConozco. El proveedor se compromete a transferir el 13% dentro de los 5 días hábiles posteriores a haber cobrado el servicio.</p>
-
       <h4>3. Obligaciones del proveedor</h4>
       <ul>
         <li>Proporcionar información veraz y actualizada al momento del registro.</li>
@@ -198,16 +206,12 @@
         <li>No contactar directamente a clientes originados por SiConozco para evadir la comisión.</li>
         <li>Mantener una calificación mínima de 3.5 estrellas para continuar en la plataforma.</li>
       </ul>
-
       <h4>4. Exclusividad y captación de clientes</h4>
-      <p>Queda prohibido que el proveedor redireccione a clientes captados a través de SiConozco hacia canales directos con el objetivo de evadir la comisión. En caso de detectarse esta práctica, SiConozco se reserva el derecho de dar de baja al proveedor de inmediato.</p>
-
+      <p>Queda prohibido que el proveedor redireccione a clientes captados a través de SiConozco hacia canales directos con el objetivo de evadir la comisión.</p>
       <h4>5. Baja de la plataforma</h4>
       <p>SiConozco puede dar de baja a proveedores que incumplan el pago de comisiones, reciban quejas frecuentes, proporcionen información falsa o incumplan estos términos.</p>
-
       <h4>6. Modificaciones</h4>
       <p>SiConozco se reserva el derecho de modificar estos términos notificando al proveedor con al menos 15 días de anticipación por correo electrónico.</p>
-
       <h4>7. Contacto</h4>
       <p>📧 contactosiconozco@gmail.com</p>
     </div>
@@ -218,7 +222,23 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
+    authDomain: "siconozco-ab496.firebaseapp.com",
+    projectId: "siconozco-ab496",
+    storageBucket: "siconozco-ab496.firebasestorage.app",
+    messagingSenderId: "983709453039",
+    appId: "1:983709453039:web:2b6d18c68b284bcdc7691a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
     const menu = document.getElementById('mobileMenu');
     menu.classList.toggle('open');
@@ -292,14 +312,16 @@
     }
   }
 
-  // ── ENVIAR ────────────────────────────
+  // ── ENVIAR A FIRESTORE ────────────────
   async function enviarAfiliacion() {
     const nombre       = document.getElementById('aNombre').value.trim();
     const tel          = document.getElementById('aTel').value.trim();
     const email        = document.getElementById('aEmail').value.trim();
     const direccion    = document.getElementById('aDireccion').value.trim();
+    const experiencia  = document.getElementById('aExperiencia').value.trim();
     const profesion    = document.getElementById('aProfesion').value;
     const especialidad = document.getElementById('aEspecialidad').value.trim();
+    const ubicacion    = document.getElementById('aUbicacion').value.trim();
     const descripcion  = document.getElementById('aDescripcion').value.trim();
     const acepta       = document.getElementById('aceptaTerminos').checked;
     const numFotos     = Object.keys(fotosSubidas).length;
@@ -310,8 +332,10 @@
     valido = validar('aTel',          'errTel',          tel.length > 6)             && valido;
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
     valido = validar('aDireccion',    'errDireccion',    direccion.length > 3)       && valido;
+    valido = validar('aExperiencia',  'errExperiencia',  experiencia.length > 0)     && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
+    valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
     valido = validar('aDescripcion',  'errDescripcion',  descripcion.length > 10)    && valido;
 
     if (numFotos < 3) {
@@ -333,39 +357,42 @@
     btn.disabled = true;
     btn.textContent = 'Enviando...';
 
-    const formData = new FormData();
-    formData.append('nombre',       nombre);
-    formData.append('telefono',     tel);
-    formData.append('email',        email);
-    formData.append('direccion',    direccion);
-    formData.append('profesion',    profesion);
-    formData.append('especialidad', especialidad);
-    formData.append('descripcion',  descripcion);
-    formData.append('terminos_aceptados', 'Sí – 13% de comisión');
-    Object.entries(fotosSubidas).forEach(([i, file]) => {
-      formData.append(`foto_${parseInt(i)+1}`, file);
-    });
-
     try {
-      const res = await fetch('https://formspree.io/f/mjybwdvb', {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
+      // Guardar en Firestore con estado "pendiente"
+      await addDoc(collection(db, 'proveedores'), {
+        nombre,
+        telefono:    tel,
+        email,
+        direccion,
+        experiencia,
+        categoria:   profesion,
+        especialidad,
+        ubicacion,
+        descripcion,
+        estado:      'pendiente',
+        fechaRegistro: new Date().toISOString()
       });
-      if (res.ok) {
-        document.getElementById('formContent').style.display = 'none';
-        document.getElementById('afilOk').style.display = 'block';
-      } else {
-        alert('Hubo un error al enviar. Intenta de nuevo.');
-        btn.disabled = false;
-        btn.textContent = 'Enviar solicitud de afiliación';
-      }
-    } catch {
-      alert('Sin conexión. Verifica tu internet e intenta de nuevo.');
+
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('afilOk').style.display      = 'block';
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un error al enviar. Intenta de nuevo.');
       btn.disabled = false;
       btn.textContent = 'Enviar solicitud de afiliación';
     }
   }
+
+  // Exponer funciones al window
+  window.toggleMenu      = toggleMenu;
+  window.cargarFoto      = cargarFoto;
+  window.quitarFoto      = quitarFoto;
+  window.abrirTerminos   = abrirTerminos;
+  window.cerrarTerminos  = cerrarTerminos;
+  window.aceptarTerminos = aceptarTerminos;
+  window.toggleCheck     = toggleCheck;
+  window.enviarAfiliacion = enviarAfiliacion;
 </script>
 
 </body>
