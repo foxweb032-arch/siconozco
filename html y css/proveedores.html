@@ -218,7 +218,6 @@
 
   async function renderProveedores() {
     const proveedores = await cargarProveedores();
-    console.log('DEBUG proveedores recibidos:', proveedores);
     const grid        = document.getElementById('provGrid');
     document.getElementById('provLoading').remove();
 
@@ -272,12 +271,12 @@
 
   // ── FILTROS ───────────────────────────
   const chips       = document.querySelectorAll('.filter-chip');
-  const cards       = document.querySelectorAll('.prov-card');
   const searchInput = document.getElementById('searchInput');
   const resultsCount = document.getElementById('resultsCount');
   let activeFilter  = 'todos';
 
   function applyFilters() {
+    const cards = document.querySelectorAll('.prov-card');
     const query = searchInput.value.trim().toLowerCase();
     let visibleCount = 0;
     cards.forEach(card => {
@@ -483,9 +482,7 @@
   }
 
   // ── CLICK EN CARD ─────────────────────
-  document.querySelectorAll('.prov-card').forEach(card => {
-    card.addEventListener('click', () => abrirModal(card));
-  });
+  // (el listener de clic ya se agrega a cada tarjeta al crearla en renderProveedores())
 
   // ── FORMSPREE ─────────────────────────
   document.getElementById('solicitudForm').addEventListener('submit', async function(e) {
