@@ -65,93 +65,10 @@
 <!-- PROVIDERS -->
 <section class="section">
   <h2 class="section-title"><em>Proveedores</em> de hoy</h2>
-  <div class="providers-grid">
-
-    <!-- data-id debe coincidir con la clave en horarios.json -->
-    <div class="provider-card" data-id="carlos-mendoza">
-      <div class="card-img-placeholder">⚡</div>
-      <div class="card-badge">⭐ 4.9</div>
-      <div class="card-body">
-        <h3>Carlos Mendoza</h3>
-        <p>Instalaciones eléctricas residenciales y comerciales. +10 años de experiencia.</p>
-        <div class="card-tags"><span class="tag">Electricista</span><span class="tag">Instalaciones</span></div>
-        <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">48 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
-      </div>
+  <div class="providers-grid" id="providersGrid">
+    <div class="prov-loading" id="indexLoading" style="grid-column:1/-1; text-align:center; padding:40px; color:var(--mid-gray);">
+      Cargando proveedores…
     </div>
-
-    <div class="provider-card" data-id="luis-rodriguez">
-      <div class="card-img-placeholder">🔧</div>
-      <div class="card-badge">⭐ 4.8</div>
-      <div class="card-body">
-        <h3>Luis Rodríguez</h3>
-        <p>Plomería en general, detección de fugas y reparación de tuberías.</p>
-        <div class="card-tags"><span class="tag">Plomero</span><span class="tag">Fugas</span></div>
-        <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">35 reseñas</span></div>
-        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
-      </div>
-    </div>
-
-    <div class="provider-card" data-id="ana-garcia">
-      <div class="card-img-placeholder">🎨</div>
-      <div class="card-badge">⭐ 5.0</div>
-      <div class="card-body">
-        <h3>Ana García</h3>
-        <p>Pintura de interiores y exteriores. Acabados texturizados y decorativos.</p>
-        <div class="card-tags"><span class="tag">Pintora</span><span class="tag">Decoración</span></div>
-        <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">62 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
-      </div>
-    </div>
-
-    <div class="provider-card" data-id="martin-torres">
-      <div class="card-img-placeholder">🧱</div>
-      <div class="card-badge">⭐ 4.7</div>
-      <div class="card-body">
-        <h3>Martín Torres</h3>
-        <p>Albañilería general, remodelaciones y construcción de cuartos adicionales.</p>
-        <div class="card-tags"><span class="tag">Albañil</span><span class="tag">Remodelación</span></div>
-        <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">29 reseñas</span></div>
-        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
-      </div>
-    </div>
-
-    <div class="provider-card" data-id="roberto-silva">
-      <div class="card-img-placeholder">🪚</div>
-      <div class="card-badge">⭐ 4.9</div>
-      <div class="card-body">
-        <h3>Roberto Silva</h3>
-        <p>Muebles a medida, closets, cocinas integrales y reparación de madera.</p>
-        <div class="card-tags"><span class="tag">Carpintero</span><span class="tag">Muebles</span></div>
-        <div class="card-stars">★★★★★ <span style="color:var(--mid-gray)">41 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
-      </div>
-    </div>
-
-    <div class="provider-card" data-id="pedro-herrera">
-      <div class="card-img-placeholder">🪟</div>
-      <div class="card-badge">⭐ 4.6</div>
-      <div class="card-body">
-        <h3>Pedro Herrera</h3>
-        <p>Instalación de vidrios, espejos, ventanas y mamparas de baño.</p>
-        <div class="card-tags"><span class="tag">Vidriero</span><span class="tag">Mamparas</span></div>
-        <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">19 reseñas</span></div>
-        <button class="btn-agenda btn-dark">📅 Agendar servicio</button>
-      </div>
-    </div>
-
-    <div class="provider-card" data-id="placeholder-jardinero">
-      <div class="card-img-placeholder">🍃</div>
-      <div class="card-badge">⭐ 4.6</div>
-      <div class="card-body">
-        <h3>PlaceHolder</h3>
-        <p>Jardinería, tala de árboles, etc...</p>
-        <div class="card-tags"><span class="tag">Jardinero</span><span class="tag">Jardín</span></div>
-        <div class="card-stars">★★★★☆ <span style="color:var(--mid-gray)">19 reseñas</span></div>
-        <button class="btn-agenda btn-yellow">📅 Agendar servicio</button>
-      </div>
-    </div>
-
   </div>
 </section>
 
@@ -353,7 +270,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios } from './firebase.js';
+  import { cargarHorarios, cargarProveedores } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
  
@@ -370,6 +287,56 @@
   let horaSeleccionada  = null;
  
  
+  // ── RENDER PROVEEDORES DESDE FIRESTORE ──
+  const EMOJIS_CAT = {
+    carpintero: '🪚', herrero: '⚒️', albanil: '🧱',
+    electricista: '⚡', plomero: '🔧', pintor: '🎨',
+    vidriero: '🪟', jardinero: '🍃'
+  };
+
+  async function renderProveedoresIndex() {
+    const proveedores = await cargarProveedores();
+    const grid = document.getElementById('providersGrid');
+    document.getElementById('indexLoading').remove();
+
+    if (proveedores.length === 0) {
+      grid.innerHTML = '<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>No hay proveedores disponibles por el momento.</div>';
+      return;
+    }
+
+    proveedores.forEach((p, i) => {
+      const emoji  = EMOJIS_CAT[p.categoria] || '🔧';
+      const foto   = (p.fotos && p.fotos.length > 0) ? p.fotos[0] : '';
+      const imgTag = foto
+        ? `<img src="${foto}" alt="${p.nombre}" style="width:100%;height:170px;object-fit:cover;display:block;">`
+        : `<div class="card-img-placeholder">${emoji}</div>`;
+      const categoriaLabel = p.categoria ? p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : '';
+      const btnClass = i % 2 === 0 ? 'btn-yellow' : 'btn-dark';
+
+      const card = document.createElement('div');
+      card.className    = 'provider-card';
+      card.dataset.id   = p.id;
+      card.dataset.cat  = p.categoria || '';
+      card.dataset.foto = foto;
+
+      card.innerHTML = `
+        ${imgTag}
+        <div class="card-badge">${categoriaLabel}</div>
+        <div class="card-body">
+          <h3>${p.nombre}</h3>
+          <p>${p.descripcion || p.especialidad}</p>
+          <div class="card-tags"><span class="tag">${categoriaLabel}</span><span class="tag">${p.especialidad}</span></div>
+          <div class="card-stars">★ <span style="color:var(--mid-gray)">Sin reseñas</span></div>
+          <button class="btn-agenda ${btnClass}">📅 Agendar servicio</button>
+        </div>`;
+
+      card.addEventListener('click', () => abrirModal(card));
+      grid.appendChild(card);
+    });
+  }
+
+  renderProveedoresIndex();
+
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────
   document.querySelector('.search-bar button').addEventListener('click', buscarHero);
@@ -407,11 +374,14 @@
     const tagEl = card.querySelector('.tag');
     document.getElementById('formCategoria').value = tagEl ? tagEl.textContent.toLowerCase() : '';
  
-    // Imagen — solo en proveedores.html
-    const imgEl = card.querySelector('.prov-card-img');
+    // Imagen — desde dataset.foto (primera foto subida por el proveedor)
     const modalImg = document.getElementById('modalImg');
-    if (imgEl) { modalImg.src = imgEl.src; modalImg.style.display = 'block'; }
-    else        { modalImg.style.display = 'none'; }
+    if (card.dataset.foto) {
+      modalImg.src = card.dataset.foto;
+      modalImg.style.display = 'block';
+    } else {
+      modalImg.style.display = 'none';
+    }
  
     // Horarios
     horarioActual = await cargarHorarios(id);
@@ -588,10 +558,7 @@
   }
  
   // ── CLICKS EN CARDS ──────────────────
-  // Compatible con .provider-card (index) y .prov-card (proveedores)
-  document.querySelectorAll('.provider-card, .prov-card').forEach(card => {
-    card.addEventListener('click', () => abrirModal(card));
-  });
+  // (cada tarjeta recibe su listener de clic al crearse en renderProveedoresIndex())
  
   // ── FORMSPREE ────────────────────────
   document.getElementById('solicitudForm').addEventListener('submit', async function(e) {
