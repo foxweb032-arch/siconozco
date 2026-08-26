@@ -44,3 +44,6 @@ async function cargarProveedores() {
 }
 
 export { db, cargarHorarios, cargarProveedores };
+
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+const storage = getStorage(app);
