@@ -161,7 +161,7 @@
 
       <!-- TÉRMINOS -->
       <div class="terms-check-area" id="termsCheckArea" onclick="toggleCheck()">
-        <input type="checkbox" id="aceptaTerminos" readonly>
+        <input type="checkbox" id="aceptaTerminos" readonly onclick="event.preventDefault()">
         <label for="aceptaTerminos">
           He leído y acepto los <a href="#" onclick="abrirTerminos(event)">Términos y Condiciones</a> de SiConozco, incluyendo la comisión del <strong>13%</strong> por cada servicio contratado a través de la plataforma.
         </label>

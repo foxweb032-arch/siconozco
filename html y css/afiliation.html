@@ -221,6 +221,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
@@ -231,8 +232,9 @@
     appId: "1:983709453039:web:2b6d18c68b284bcdc7691a"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const app     = initializeApp(firebaseConfig);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
@@ -308,12 +310,28 @@
     }
   }
 
+  // ── SUBIR FOTOS A STORAGE ─────────────
+  // Sube todos los archivos en fotosSubidas y devuelve un array de URLs,
+  // en el mismo orden en que se seleccionaron los slots.
+  async function subirFotos() {
+    const indices = Object.keys(fotosSubidas).sort((a, b) => a - b);
+    const urls = [];
+    for (const index of indices) {
+      const archivo = fotosSubidas[index];
+      const nombreUnico = `${Date.now()}-${index}-${archivo.name}`;
+      const storageRef = ref(storage, `proveedores/${nombreUnico}`);
+      await uploadBytes(storageRef, archivo);
+      const url = await getDownloadURL(storageRef);
+      urls.push(url);
+    }
+    return urls;
+  }
+
   // ── ENVIAR A FIRESTORE ────────────────
   async function enviarAfiliacion() {
     const nombre       = document.getElementById('aNombre').value.trim();
     const tel          = document.getElementById('aTel').value.trim();
     const email        = document.getElementById('aEmail').value.trim();
-    const direccion    = document.getElementById('aDireccion').value.trim();
     const experiencia  = document.getElementById('aExperiencia').value.trim();
     const profesion    = document.getElementById('aProfesion').value;
     const especialidad = document.getElementById('aEspecialidad').value.trim();
@@ -327,7 +345,6 @@
     valido = validar('aNombre',       'errNombre',       nombre.length > 1)         && valido;
     valido = validar('aTel',          'errTel',          tel.length > 6)             && valido;
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
-    valido = validar('aDireccion',    'errDireccion',    direccion.length > 3)       && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
     valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
@@ -350,10 +367,15 @@
 
     const btn = document.querySelector('.afil-submit');
     btn.disabled = true;
-    btn.textContent = 'Enviando...';
+    btn.textContent = 'Subiendo fotos...';
 
     try {
-      // Guardar en Firestore con estado "pendiente"
+      // 1. Subir fotos a Storage y obtener sus URLs
+      const urlsFotos = await subirFotos();
+
+      btn.textContent = 'Enviando...';
+
+      // 2. Guardar en Firestore con estado "pendiente"
       await addDoc(collection(db, 'proveedores'), {
         nombre,
         telefono:    tel,
@@ -363,6 +385,7 @@
         especialidad,
         ubicacion,
         descripcion,
+        fotos:       urlsFotos,
         estado:      'pendiente',
         fechaRegistro: new Date().toISOString()
       });
