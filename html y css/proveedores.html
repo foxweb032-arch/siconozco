@@ -233,6 +233,7 @@
       card.dataset.cat      = p.categoria || '';
       card.dataset.id       = p.id;
       card.dataset.name     = `${p.nombre} ${p.especialidad}`.toLowerCase();
+      card.dataset.foto     = (p.fotos && p.fotos.length > 0) ? p.fotos[0] : '';
 
       card.innerHTML = `
         <div class="prov-card-img-wrap">
@@ -318,7 +319,14 @@
     document.getElementById('modalRating').textContent       = card.querySelector('.prov-rating').textContent.trim();
     document.getElementById('modalUbicacion').textContent    = card.querySelectorAll('.prov-meta-row')[0].textContent.replace('📍','').trim();
     document.getElementById('modalExperiencia').textContent  = card.querySelectorAll('.prov-meta-row')[1].textContent.replace('💼','').trim();
-    document.getElementById('modalImg').src                  = card.querySelector('.prov-card-img').src;
+    const modalImg = document.getElementById('modalImg');
+    if (card.dataset.foto) {
+      modalImg.src = card.dataset.foto;
+      modalImg.style.display = '';
+    } else {
+      modalImg.src = '';
+      modalImg.style.display = 'none';
+    }
     document.getElementById('formProveedor').value           = card.querySelector('h3').textContent;
     document.getElementById('formCategoria').value           = card.dataset.cat;
 

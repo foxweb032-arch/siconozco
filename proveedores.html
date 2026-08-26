@@ -227,17 +227,21 @@
     }
 
     proveedores.forEach(p => {
-      const emoji = EMOJIS_CAT[p.categoria] || '🔧';
+      const emoji  = EMOJIS_CAT[p.categoria] || '🔧';
+      const foto   = (p.fotos && p.fotos.length > 0) ? p.fotos[0] : '';
+      const imgTag = foto
+        ? `<img src="${foto}" alt="${p.nombre}" style="width:100%;height:170px;object-fit:cover;display:block;">`
+        : `<div class="prov-card-img-placeholder" style="width:100%;height:170px;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);display:flex;align-items:center;justify-content:center;font-size:3rem;">${emoji}</div>`;
       const card  = document.createElement('div');
       card.className        = 'prov-card visible';
       card.dataset.cat      = p.categoria || '';
       card.dataset.id       = p.id;
       card.dataset.name     = `${p.nombre} ${p.especialidad}`.toLowerCase();
-      card.dataset.foto     = (p.fotos && p.fotos.length > 0) ? p.fotos[0] : '';
+      card.dataset.foto     = foto;
 
       card.innerHTML = `
         <div class="prov-card-img-wrap">
-          <div class="prov-card-img-placeholder" style="width:100%;height:170px;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);display:flex;align-items:center;justify-content:center;font-size:3rem;">${emoji}</div>
+          ${imgTag}
           <span class="prov-card-badge">${p.categoria ? p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : ''}</span>
         </div>
         <div class="prov-card-body">
