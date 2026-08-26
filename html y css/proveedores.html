@@ -218,6 +218,7 @@
 
   async function renderProveedores() {
     const proveedores = await cargarProveedores();
+    console.log('DEBUG proveedores recibidos:', proveedores);
     const grid        = document.getElementById('provGrid');
     document.getElementById('provLoading').remove();
 
@@ -558,7 +559,6 @@
   window.irPaso3            = irPaso3;
   window.enviarWhatsApp     = enviarWhatsApp;
   window.toggleMenu         = toggleMenu;
-  window.buscarHero         = buscarHero;
 </script>
 
 </body>
