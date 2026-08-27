@@ -64,7 +64,7 @@
 
 <!-- PROVIDERS -->
 <section class="section">
-  <h2 class="section-title"><em>Proveedores</em> de hoy</h2>
+  <h2 class="section-title">Nuestros <em>mejor calificados</em></h2>
   <div class="providers-grid" id="providersGrid">
     <div class="prov-loading" id="indexLoading" style="grid-column:1/-1; text-align:center; padding:40px; color:var(--mid-gray);">
       Cargando proveedores…
@@ -296,6 +296,7 @@
 
   async function renderProveedoresIndex() {
     const proveedores = await cargarProveedores();
+    proveedores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     const grid = document.getElementById('providersGrid');
     document.getElementById('indexLoading').remove();
 
@@ -312,6 +313,10 @@
         : `<div class="card-img-placeholder">${emoji}</div>`;
       const categoriaLabel = p.categoria ? p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : '';
       const btnClass = i % 2 === 0 ? 'btn-yellow' : 'btn-dark';
+      const esNuevo  = !p.totalResenas || p.totalResenas < 5;
+      const nuevoBadge = esNuevo
+        ? `<span class="card-badge-new">✨ Nuevo</span>`
+        : '';
 
       const card = document.createElement('div');
       card.className    = 'provider-card';
@@ -320,6 +325,7 @@
       card.dataset.foto = foto;
 
       card.innerHTML = `
+        ${nuevoBadge}
         ${imgTag}
         <div class="card-badge">${categoriaLabel}</div>
         <div class="card-body">

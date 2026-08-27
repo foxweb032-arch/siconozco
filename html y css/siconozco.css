@@ -1365,3 +1365,58 @@
 .cal-leyenda-dot.disponible { background: var(--light-gray); border: 1px solid #CCC; }
 .cal-leyenda-dot.seleccionado { background: var(--black); }
 .cal-leyenda-dot.no-disponible { background: transparent; border: 1px solid #EEE; }
+
+/* ══════════════════════════════════════
+   PASO 3 — CONFIRMACIÓN DE RESERVACIÓN
+══════════════════════════════════════ */
+.confirm-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 20px;
+}
+.confirm-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+  animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.confirm-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  color: var(--black);
+  margin-bottom: 16px;
+}
+.confirm-resumen {
+  font-size: 0.92rem;
+  color: var(--black);
+  background: var(--light-gray);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  line-height: 1.7;
+  width: 100%;
+}
+.confirm-note {
+  font-size: 0.85rem;
+  color: var(--mid-gray);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.confirm-close {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 13px 40px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.confirm-close:hover { background: var(--dark-gray); transform: translateY(-1px); }
