@@ -280,6 +280,9 @@
         : `<div class="prov-card-img-placeholder" style="width:100%;height:170px;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);display:flex;align-items:center;justify-content:center;font-size:3rem;">${emoji}</div>`;
       const esNuevo = !p.totalResenas || p.totalResenas < 5;
       const nuevoBadge = esNuevo ? `<span class="card-badge-new">✨ Nuevo</span>` : '';
+      const ratingTexto = (p.totalResenas && p.totalResenas > 0)
+        ? `<span class="star">★</span> <span class="count">${p.rating.toFixed(1)} · ${p.totalResenas} ${p.totalResenas === 1 ? 'reseña' : 'reseñas'}</span>`
+        : `<span class="star">★</span> <span class="count">Sin reseñas</span>`;
       const card  = document.createElement('div');
       card.className        = 'prov-card visible';
       card.dataset.cat      = p.categoria || '';
@@ -296,7 +299,7 @@
         <div class="prov-card-body">
           <div class="prov-card-top">
             <h3>${p.nombre}</h3>
-            <div class="prov-rating"><span class="star">★</span> <span class="count">Sin reseñas</span></div>
+            <div class="prov-rating">${ratingTexto}</div>
           </div>
           <p class="specialty">${p.especialidad}</p>
           <div class="prov-meta">
@@ -337,7 +340,7 @@
     const estrellasLlenas = Math.round(rating);
     document.getElementById('perfilRatingNum').textContent    = totalResenas > 0 ? rating.toFixed(1) : '—';
     document.getElementById('perfilRatingStars').textContent  = '★'.repeat(estrellasLlenas) + '☆'.repeat(5 - estrellasLlenas);
-    document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} reseñas` : 'Sin reseñas';
+    document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} ${totalResenas === 1 ? 'reseña' : 'reseñas'}` : 'Sin reseñas';
 
     const fotos   = p.fotos || [];
     const gallery = document.getElementById('perfilGallery');
