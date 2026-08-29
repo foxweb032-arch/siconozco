@@ -269,6 +269,32 @@
   </div>
 </div>
 
+<!-- MODAL DE PERFIL DE PROVEEDOR -->
+<div class="modal-overlay" id="perfilOverlay" onclick="cerrarPerfilSiFondo(event)">
+  <div class="modal-box">
+    <div class="perfil-gallery" id="perfilGallery"></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <h2 id="perfilNombre"></h2>
+        <button class="modal-close" onclick="cerrarPerfil()">✕</button>
+      </div>
+      <p class="modal-specialty" id="perfilEspecialidad"></p>
+      <div class="modal-meta">
+        <div class="modal-meta-row">📍 <span id="perfilUbicacion"></span></div>
+        <div class="modal-meta-row">💼 <span id="perfilExperiencia"></span></div>
+      </div>
+      <div class="perfil-rating-row">
+        <span class="perfil-rating-num" id="perfilRatingNum"></span>
+        <span class="perfil-rating-stars" id="perfilRatingStars"></span>
+        <span class="perfil-rating-count" id="perfilRatingCount"></span>
+      </div>
+      <p class="perfil-reviews-title">Reseñas de clientes</p>
+      <div id="perfilReviews"></div>
+      <button class="perfil-agendar-btn" onclick="agendarDesdePerfil()">📅 Agendar servicio</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { cargarHorarios, cargarProveedores } from './firebase.js';
 
@@ -285,6 +311,8 @@
   let calFecha         = new Date();   // mes visible en el calendario
   let fechaSeleccionada = null;        // Date seleccionada
   let horaSeleccionada  = null;
+  let proveedoresCache  = [];
+  let perfilCardActual  = null;
  
  
   // ── RENDER PROVEEDORES DESDE FIRESTORE ──
@@ -297,6 +325,7 @@
   async function renderProveedoresIndex() {
     const proveedores = await cargarProveedores();
     proveedores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    proveedoresCache = proveedores;
     const grid = document.getElementById('providersGrid');
     document.getElementById('indexLoading').remove();
 
@@ -336,12 +365,71 @@
           <button class="btn-agenda ${btnClass}">📅 Agendar servicio</button>
         </div>`;
 
-      card.addEventListener('click', () => abrirModal(card));
+      card.addEventListener('click', () => abrirPerfil(card));
+      card.querySelector('.btn-agenda').addEventListener('click', (e) => {
+        e.stopPropagation();
+        abrirModal(card);
+      });
       grid.appendChild(card);
     });
   }
 
   renderProveedoresIndex();
+
+  // ── PERFIL DE PROVEEDOR ───────────────
+  function abrirPerfil(card) {
+    const p = proveedoresCache.find(x => x.id === card.dataset.id);
+    if (!p) return;
+    perfilCardActual = card;
+
+    document.getElementById('perfilNombre').textContent       = p.nombre;
+    document.getElementById('perfilEspecialidad').textContent = `${p.especialidad}${p.categoria ? ' · ' + p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : ''}`;
+    document.getElementById('perfilUbicacion').textContent    = p.ubicacion || '';
+    document.getElementById('perfilExperiencia').textContent  = p.experiencia ? `${p.experiencia} de experiencia` : '';
+
+    const rating       = p.rating || 0;
+    const totalResenas = p.totalResenas || 0;
+    const estrellasLlenas = Math.round(rating);
+    document.getElementById('perfilRatingNum').textContent    = totalResenas > 0 ? rating.toFixed(1) : '—';
+    document.getElementById('perfilRatingStars').textContent  = '★'.repeat(estrellasLlenas) + '☆'.repeat(5 - estrellasLlenas);
+    document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} reseñas` : 'Sin reseñas';
+
+    const fotos   = p.fotos || [];
+    const gallery = document.getElementById('perfilGallery');
+    if (fotos.length === 0) {
+      const emoji = EMOJIS_CAT[p.categoria] || '🔧';
+      gallery.innerHTML = `<div class="perfil-gallery-placeholder">${emoji}</div>`;
+    } else {
+      let html = `<img class="perfil-main" src="${fotos[0]}" alt="${p.nombre}">`;
+      fotos.slice(1, 4).forEach((f, i) => {
+        if (i === 2 && fotos.length > 4) {
+          html += `<div class="perfil-gallery-more" data-extra="+${fotos.length - 4} fotos"><img src="${f}" alt=""></div>`;
+        } else {
+          html += `<img src="${f}" alt="">`;
+        }
+      });
+      gallery.innerHTML = html;
+    }
+
+    document.getElementById('perfilReviews').innerHTML =
+      '<p class="perfil-empty-reviews">Aún no hay reseñas para este proveedor.</p>';
+
+    document.getElementById('perfilOverlay').classList.add('activo');
+  }
+
+  function cerrarPerfil() {
+    document.getElementById('perfilOverlay').classList.remove('activo');
+  }
+  function cerrarPerfilSiFondo(e) {
+    if (e.target.id === 'perfilOverlay') cerrarPerfil();
+  }
+  function agendarDesdePerfil() {
+    cerrarPerfil();
+    if (perfilCardActual) abrirModal(perfilCardActual);
+  }
+  window.cerrarPerfil        = cerrarPerfil;
+  window.cerrarPerfilSiFondo = cerrarPerfilSiFondo;
+  window.agendarDesdePerfil  = agendarDesdePerfil;
 
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────

@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
@@ -43,7 +43,49 @@ async function cargarProveedores() {
   }
 }
 
-export { db, cargarHorarios, cargarProveedores };
+// ── CARGAR RESEÑAS DE UN PROVEEDOR ────
+async function cargarResenas(proveedorId) {
+  try {
+    const snapshot = await getDocs(collection(db, 'proveedores', proveedorId, 'resenas'));
+    return snapshot.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  } catch (error) {
+    console.error('Error cargando reseñas:', error);
+    return [];
+  }
+}
+
+// ── ENVIAR NUEVA RESEÑA Y RECALCULAR PROMEDIO ──
+async function enviarResena(proveedorId, calificacion, comentario, nombreCliente) {
+  const proveedorRef = doc(db, 'proveedores', proveedorId);
+  const resenaRef     = doc(collection(db, 'proveedores', proveedorId, 'resenas'));
+
+  await runTransaction(db, async (transaction) => {
+    const proveedorSnap = await transaction.get(proveedorRef);
+    if (!proveedorSnap.exists()) throw new Error('Proveedor no encontrado');
+
+    const data          = proveedorSnap.data();
+    const ratingActual   = data.rating || 0;
+    const totalActual    = data.totalResenas || 0;
+    const nuevoTotal     = totalActual + 1;
+    const nuevoRating    = ((ratingActual * totalActual) + calificacion) / nuevoTotal;
+
+    transaction.set(resenaRef, {
+      clienteNombre: nombreCliente || 'Cliente anónimo',
+      calificacion,
+      comentario,
+      fecha: new Date().toISOString()
+    });
+
+    transaction.update(proveedorRef, {
+      rating: nuevoRating,
+      totalResenas: nuevoTotal
+    });
+  });
+}
+
+export { db, cargarHorarios, cargarProveedores, cargarResenas, enviarResena };
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 const storage = getStorage(app);

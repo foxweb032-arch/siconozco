@@ -290,13 +290,27 @@
       </div>
       <p class="perfil-reviews-title">Reseñas de clientes</p>
       <div id="perfilReviews"></div>
+
+      <p class="perfil-reviews-title">Deja tu reseña</p>
+      <div class="resena-stars-input" id="resenaStarsInput">
+        <span onclick="seleccionarEstrella(1)" data-n="1">☆</span>
+        <span onclick="seleccionarEstrella(2)" data-n="2">☆</span>
+        <span onclick="seleccionarEstrella(3)" data-n="3">☆</span>
+        <span onclick="seleccionarEstrella(4)" data-n="4">☆</span>
+        <span onclick="seleccionarEstrella(5)" data-n="5">☆</span>
+      </div>
+      <input type="text" id="resenaNombre" class="resena-input" placeholder="Tu nombre (opcional)">
+      <textarea id="resenaComentario" class="resena-textarea" rows="3" placeholder="Cuéntanos cómo te fue con este proveedor..."></textarea>
+      <p class="resena-error" id="resenaError" style="display:none;"></p>
+      <button class="perfil-agendar-btn" id="btnEnviarResena" onclick="enviarResenaClick()" style="background:var(--black);color:var(--white);margin-bottom:8px;">Enviar reseña</button>
+
       <button class="perfil-agendar-btn" onclick="agendarDesdePerfil()">📅 Agendar servicio</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-  import { cargarHorarios, cargarProveedores } from './firebase.js';
+  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
  
@@ -313,6 +327,8 @@
   let horaSeleccionada  = null;
   let proveedoresCache  = [];
   let perfilCardActual  = null;
+  let perfilProveedorId = null;
+  let resenaEstrellas   = 0;
  
  
   // ── RENDER PROVEEDORES DESDE FIRESTORE ──
@@ -377,10 +393,11 @@
   renderProveedoresIndex();
 
   // ── PERFIL DE PROVEEDOR ───────────────
-  function abrirPerfil(card) {
+  async function abrirPerfil(card) {
     const p = proveedoresCache.find(x => x.id === card.dataset.id);
     if (!p) return;
-    perfilCardActual = card;
+    perfilCardActual  = card;
+    perfilProveedorId = p.id;
 
     document.getElementById('perfilNombre').textContent       = p.nombre;
     document.getElementById('perfilEspecialidad').textContent = `${p.especialidad}${p.categoria ? ' · ' + p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : ''}`;
@@ -411,10 +428,82 @@
       gallery.innerHTML = html;
     }
 
-    document.getElementById('perfilReviews').innerHTML =
-      '<p class="perfil-empty-reviews">Aún no hay reseñas para este proveedor.</p>';
+    document.getElementById('resenaNombre').value = '';
+    document.getElementById('resenaComentario').value = '';
+    document.getElementById('resenaError').style.display = 'none';
+    seleccionarEstrella(0);
 
     document.getElementById('perfilOverlay').classList.add('activo');
+
+    const reviewsEl = document.getElementById('perfilReviews');
+    reviewsEl.innerHTML = '<p class="perfil-empty-reviews">Cargando reseñas…</p>';
+    const resenas = await cargarResenas(p.id);
+    if (resenas.length === 0) {
+      reviewsEl.innerHTML = '<p class="perfil-empty-reviews">Aún no hay reseñas para este proveedor. ¡Sé el primero en dejar una!</p>';
+    } else {
+      reviewsEl.innerHTML = resenas.map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-author">${r.clienteNombre || 'Cliente anónimo'}</span>
+            <span class="review-stars">${'★'.repeat(r.calificacion)}${'☆'.repeat(5 - r.calificacion)}</span>
+          </div>
+          <p class="review-comment">${r.comentario}</p>
+        </div>
+      `).join('');
+    }
+  }
+
+  function seleccionarEstrella(n) {
+    resenaEstrellas = n;
+    document.querySelectorAll('#resenaStarsInput span').forEach(s => {
+      const val = parseInt(s.dataset.n);
+      s.textContent = val <= n ? '★' : '☆';
+      s.classList.toggle('activa', val <= n);
+    });
+  }
+
+  async function enviarResenaClick() {
+    const errorEl = document.getElementById('resenaError');
+    errorEl.style.display = 'none';
+
+    if (resenaEstrellas === 0) {
+      errorEl.textContent = 'Selecciona una calificación de estrellas.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    const comentario = document.getElementById('resenaComentario').value.trim();
+    if (comentario.length === 0) {
+      errorEl.textContent = 'Escribe un comentario breve.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    const nombre = document.getElementById('resenaNombre').value.trim();
+    const btn = document.getElementById('btnEnviarResena');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      await enviarResena(perfilProveedorId, resenaEstrellas, comentario, nombre);
+
+      const p = proveedoresCache.find(x => x.id === perfilProveedorId);
+      if (p) {
+        const totalAnterior  = p.totalResenas || 0;
+        const ratingAnterior = p.rating || 0;
+        p.totalResenas = totalAnterior + 1;
+        p.rating = ((ratingAnterior * totalAnterior) + resenaEstrellas) / p.totalResenas;
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Enviar reseña';
+      abrirPerfil(perfilCardActual);
+
+    } catch (error) {
+      console.error('Error al enviar reseña:', error);
+      errorEl.textContent = 'Hubo un error al enviar tu reseña. Intenta de nuevo.';
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Enviar reseña';
+    }
   }
 
   function cerrarPerfil() {
@@ -430,6 +519,8 @@
   window.cerrarPerfil        = cerrarPerfil;
   window.cerrarPerfilSiFondo = cerrarPerfilSiFondo;
   window.agendarDesdePerfil  = agendarDesdePerfil;
+  window.seleccionarEstrella = seleccionarEstrella;
+  window.enviarResenaClick   = enviarResenaClick;
 
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────
