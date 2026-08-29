@@ -17,6 +17,7 @@
   <ul class="nav-links">
     <li><a href="index.html">Inicio</a></li>
     <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
     <li><a href="afiliation.html">Publicar servicio</a></li>
     <li><a href="contacto.html" class="btn-contact">Contacto</a></li>
   </ul>
@@ -29,6 +30,7 @@
   <button class="close-btn" onclick="toggleMenu()">✕</button>
   <a href="index.html" onclick="toggleMenu()">Inicio</a>
   <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
   <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
   <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
 </div>
@@ -216,6 +218,7 @@
 
   async function renderProveedores() {
     const proveedores = await cargarProveedores();
+    proveedores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     const grid        = document.getElementById('provGrid');
     document.getElementById('provLoading').remove();
 
@@ -230,6 +233,8 @@
       const imgTag = foto
         ? `<img src="${foto}" alt="${p.nombre}" style="width:100%;height:170px;object-fit:cover;display:block;">`
         : `<div class="prov-card-img-placeholder" style="width:100%;height:170px;background:linear-gradient(135deg,#e0e0e0,#c8c8c8);display:flex;align-items:center;justify-content:center;font-size:3rem;">${emoji}</div>`;
+      const esNuevo = !p.totalResenas || p.totalResenas < 5;
+      const nuevoBadge = esNuevo ? `<span class="card-badge-new">✨ Nuevo</span>` : '';
       const card  = document.createElement('div');
       card.className        = 'prov-card visible';
       card.dataset.cat      = p.categoria || '';
@@ -240,6 +245,7 @@
       card.innerHTML = `
         <div class="prov-card-img-wrap">
           ${imgTag}
+          ${nuevoBadge}
           <span class="prov-card-badge">${p.categoria ? p.categoria.charAt(0).toUpperCase() + p.categoria.slice(1) : ''}</span>
         </div>
         <div class="prov-card-body">
