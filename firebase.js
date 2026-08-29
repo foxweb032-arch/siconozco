@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
@@ -11,8 +13,10 @@ const firebaseConfig = {
   measurementId: "G-0NREY720R5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+const auth    = getAuth(app);
 
 // ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
@@ -85,7 +89,64 @@ async function enviarResena(proveedorId, calificacion, comentario, nombreCliente
   });
 }
 
-export { db, cargarHorarios, cargarProveedores, cargarResenas, enviarResena };
+// ── AUTENTICACIÓN (ADMIN) ─────────────
+async function loginAdmin(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+async function logoutAdmin() {
+  return signOut(auth);
+}
+function onAuthChange(callback) {
+  return onAuthStateChanged(auth, callback);
+}
 
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-const storage = getStorage(app);
+// ── CARGAR TODOS LOS PROVEEDORES (ADMIN) ──
+// A diferencia de cargarProveedores(), esta trae TODOS los estados
+async function cargarTodosLosProveedores() {
+  try {
+    const snapshot = await getDocs(collection(db, 'proveedores'));
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (error) {
+    console.error('Error cargando todos los proveedores:', error);
+    return [];
+  }
+}
+
+// ── ACTUALIZAR CAMPOS DE UN PROVEEDOR (ADMIN) ──
+async function actualizarProveedor(proveedorId, datos) {
+  const proveedorRef = doc(db, 'proveedores', proveedorId);
+  await updateDoc(proveedorRef, datos);
+}
+
+// ── ELIMINAR PROVEEDOR (ADMIN) ────────
+async function eliminarProveedor(proveedorId) {
+  const proveedorRef = doc(db, 'proveedores', proveedorId);
+  await deleteDoc(proveedorRef);
+}
+
+// ── SUBIR FOTO DESDE EL PANEL (ADMIN) ──
+async function subirFotoAdmin(archivo) {
+  const nombreUnico = `${Date.now()}-${archivo.name}`;
+  const storageRef  = ref(storage, `proveedores/${nombreUnico}`);
+  await uploadBytes(storageRef, archivo);
+  return getDownloadURL(storageRef);
+}
+
+// ── ELIMINAR FOTO DE STORAGE (ADMIN) ──
+async function eliminarFotoStorage(url) {
+  try {
+    const fotoRef = ref(storage, url);
+    await deleteObject(fotoRef);
+  } catch (error) {
+    console.warn('No se pudo eliminar la foto de Storage (puede que ya no exista):', error);
+  }
+}
+
+export {
+  db, auth,
+  cargarHorarios, cargarProveedores, cargarResenas, enviarResena,
+  loginAdmin, logoutAdmin, onAuthChange,
+  cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
+  subirFotoAdmin, eliminarFotoStorage
+};
+

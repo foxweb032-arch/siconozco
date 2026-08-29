@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiConozco – Panel de administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="siconozco.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="admin-login-wrap" id="loginWrap">
+  <div class="admin-login-box">
+    <h2>Panel de administración</h2>
+    <p class="sub">Acceso exclusivo para el equipo de SiConozco</p>
+    <input type="email" id="loginEmail" placeholder="Correo electrónico">
+    <input type="password" id="loginPassword" placeholder="Contraseña">
+    <button class="admin-login-btn" onclick="hacerLogin()">Entrar</button>
+    <p class="admin-login-error" id="loginError"></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardWrap" style="display:none;">
+
+  <div class="admin-header">
+    <h1>🔧 Panel de administración</h1>
+    <button class="admin-logout-btn" onclick="hacerLogout()">Cerrar sesión</button>
+  </div>
+
+  <div class="admin-tabs" id="adminTabs">
+    <button class="admin-tab activa" data-estado="todos" onclick="cambiarFiltro('todos')">Todos</button>
+    <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
+    <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
+    <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
+  </div>
+
+  <div class="admin-grid" id="adminGrid">
+    <p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">Cargando proveedores…</p>
+  </div>
+</div>
+
+<!-- MODAL DE GESTIÓN -->
+<div class="modal-overlay" id="editOverlay" onclick="cerrarEdicionSiFondo(event)">
+  <div class="modal-box admin-edit-box">
+    <div class="modal-body">
+      <div class="modal-header">
+        <h2>Gestionar proveedor</h2>
+        <button class="modal-close" onclick="cerrarEdicion()">✕</button>
+      </div>
+
+      <span class="admin-status-badge" id="editEstadoBadge"></span>
+
+      <div class="admin-status-row">
+        <button class="admin-btn-aprobar" onclick="cambiarEstado('aprobado')">✓ Aprobar</button>
+        <button class="admin-btn-rechazar" onclick="cambiarEstado('rechazado')">✕ Rechazar</button>
+        <button class="admin-btn-pendiente" onclick="cambiarEstado('pendiente')">⏳ Pendiente</button>
+      </div>
+
+      <p class="perfil-reviews-title">Fotos</p>
+      <div class="admin-photos-grid" id="editPhotosGrid"></div>
+      <label class="admin-add-photo-label" style="width:80px;">
+        +
+        <input type="file" id="editAddPhotoInput" accept="image/*" onchange="agregarFotoAdmin(event)">
+      </label>
+
+      <p class="perfil-reviews-title">Datos del proveedor</p>
+      <div class="admin-field">
+        <label>Nombre</label>
+        <input type="text" id="editNombre">
+      </div>
+      <div class="admin-field">
+        <label>Teléfono</label>
+        <input type="text" id="editTelefono">
+      </div>
+      <div class="admin-field">
+        <label>Email</label>
+        <input type="email" id="editEmail">
+      </div>
+      <div class="admin-field">
+        <label>Categoría</label>
+        <select id="editCategoria">
+          <option value="carpintero">Carpintero</option>
+          <option value="herrero">Herrero</option>
+          <option value="albanil">Albañil</option>
+          <option value="electricista">Electricista</option>
+          <option value="plomero">Plomero</option>
+          <option value="pintor">Pintor</option>
+          <option value="vidriero">Vidriero</option>
+          <option value="jardinero">Jardinero</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label>Especialidad</label>
+        <input type="text" id="editEspecialidad">
+      </div>
+      <div class="admin-field">
+        <label>Ubicación</label>
+        <input type="text" id="editUbicacion">
+      </div>
+      <div class="admin-field">
+        <label>Años de experiencia</label>
+        <input type="text" id="editExperiencia">
+      </div>
+      <div class="admin-field">
+        <label>Descripción</label>
+        <textarea id="editDescripcion" rows="3"></textarea>
+      </div>
+
+      <button class="admin-save-btn" id="btnGuardarCambios" onclick="guardarCambios()">Guardar cambios</button>
+      <p class="admin-save-msg" id="saveMsg">✓ Cambios guardados</p>
+
+      <button class="admin-delete-btn" onclick="confirmarEliminar()">Eliminar proveedor permanentemente</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import {
+    onAuthChange, loginAdmin, logoutAdmin,
+    cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
+    subirFotoAdmin, eliminarFotoStorage
+  } from './firebase.js';
+
+  let proveedoresCache = [];
+  let filtroActual      = 'todos';
+  let proveedorEnEdicion = null; // objeto completo del proveedor abierto
+
+  // ── LOGIN / LOGOUT ─────────────────────
+  onAuthChange((user) => {
+    if (user) {
+      document.getElementById('loginWrap').style.display = 'none';
+      document.getElementById('dashboardWrap').style.display = 'block';
+      cargarYRenderizar();
+    } else {
+      document.getElementById('loginWrap').style.display = 'flex';
+      document.getElementById('dashboardWrap').style.display = 'none';
+    }
+  });
+
+  async function hacerLogin() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorEl  = document.getElementById('loginError');
+    errorEl.style.display = 'none';
+
+    try {
+      await loginAdmin(email, password);
+    } catch (error) {
+      console.error('Error de login:', error);
+      errorEl.textContent = 'Correo o contraseña incorrectos.';
+      errorEl.style.display = 'block';
+    }
+  }
+
+  async function hacerLogout() {
+    await logoutAdmin();
+  }
+
+  // ── CARGAR Y RENDERIZAR TARJETAS ───────
+  async function cargarYRenderizar() {
+    proveedoresCache = await cargarTodosLosProveedores();
+    renderGrid();
+  }
+
+  function cambiarFiltro(estado) {
+    filtroActual = estado;
+    document.querySelectorAll('.admin-tab').forEach(t => {
+      t.classList.toggle('activa', t.dataset.estado === estado);
+    });
+    renderGrid();
+  }
+
+  const EMOJIS_CAT = {
+    carpintero: '🪚', herrero: '⚒️', albanil: '🧱',
+    electricista: '⚡', plomero: '🔧', pintor: '🎨',
+    vidriero: '🪟', jardinero: '🍃'
+  };
+
+  function renderGrid() {
+    const grid = document.getElementById('adminGrid');
+    const lista = filtroActual === 'todos'
+      ? proveedoresCache
+      : proveedoresCache.filter(p => p.estado === filtroActual);
+
+    if (lista.length === 0) {
+      grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">No hay proveedores en esta categoría.</p>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    lista.forEach(p => {
+      const foto = (p.fotos && p.fotos.length > 0) ? p.fotos[0] : '';
+      const emoji = EMOJIS_CAT[p.categoria] || '🔧';
+      const thumbHtml = foto
+        ? `<img class="admin-card-thumb" src="${foto}" alt="${p.nombre}">`
+        : `<div class="admin-card-thumb-placeholder">${emoji}</div>`;
+
+      const card = document.createElement('div');
+      card.className = 'admin-card';
+      card.innerHTML = `
+        ${thumbHtml}
+        <div class="admin-card-body">
+          <span class="admin-status-badge admin-status-${p.estado || 'pendiente'}">${p.estado || 'pendiente'}</span>
+          <h3>${p.nombre}</h3>
+          <p>${p.especialidad || ''}</p>
+          <button class="admin-manage-btn">Gestionar</button>
+        </div>`;
+      card.querySelector('.admin-manage-btn').addEventListener('click', () => abrirEdicion(p.id));
+      grid.appendChild(card);
+    });
+  }
+
+  // ── MODAL DE EDICIÓN ───────────────────
+  function abrirEdicion(id) {
+    const p = proveedoresCache.find(x => x.id === id);
+    if (!p) return;
+    proveedorEnEdicion = p;
+
+    document.getElementById('editEstadoBadge').textContent = p.estado || 'pendiente';
+    document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${p.estado || 'pendiente'}`;
+
+    document.getElementById('editNombre').value       = p.nombre || '';
+    document.getElementById('editTelefono').value     = p.telefono || '';
+    document.getElementById('editEmail').value        = p.email || '';
+    document.getElementById('editCategoria').value    = p.categoria || 'electricista';
+    document.getElementById('editEspecialidad').value = p.especialidad || '';
+    document.getElementById('editUbicacion').value    = p.ubicacion || '';
+    document.getElementById('editExperiencia').value  = p.experiencia || '';
+    document.getElementById('editDescripcion').value  = p.descripcion || '';
+
+    document.getElementById('saveMsg').style.display = 'none';
+    renderFotosEdicion();
+
+    document.getElementById('editOverlay').classList.add('activo');
+  }
+
+  function cerrarEdicion() {
+    document.getElementById('editOverlay').classList.remove('activo');
+    proveedorEnEdicion = null;
+  }
+  function cerrarEdicionSiFondo(e) {
+    if (e.target.id === 'editOverlay') cerrarEdicion();
+  }
+
+  function renderFotosEdicion() {
+    const grid  = document.getElementById('editPhotosGrid');
+    const fotos = proveedorEnEdicion.fotos || [];
+    grid.innerHTML = fotos.map((url, i) => `
+      <div class="admin-photo-item">
+        <img src="${url}" alt="foto ${i + 1}">
+        <button class="admin-photo-remove" data-index="${i}">✕</button>
+      </div>
+    `).join('');
+    grid.querySelectorAll('.admin-photo-remove').forEach(btn => {
+      btn.addEventListener('click', () => eliminarFotoAdmin(parseInt(btn.dataset.index)));
+    });
+  }
+
+  async function agregarFotoAdmin(e) {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+    e.target.disabled = true;
+
+    try {
+      const url = await subirFotoAdmin(archivo);
+      const fotosNuevas = [...(proveedorEnEdicion.fotos || []), url];
+      await actualizarProveedor(proveedorEnEdicion.id, { fotos: fotosNuevas });
+      proveedorEnEdicion.fotos = fotosNuevas;
+      renderFotosEdicion();
+    } catch (error) {
+      console.error('Error al subir foto:', error);
+      alert('Hubo un error al subir la foto.');
+    } finally {
+      e.target.disabled = false;
+      e.target.value = '';
+    }
+  }
+
+  async function eliminarFotoAdmin(index) {
+    if (!confirm('¿Quitar esta foto?')) return;
+    const fotos = [...(proveedorEnEdicion.fotos || [])];
+    const [urlEliminada] = fotos.splice(index, 1);
+
+    try {
+      await actualizarProveedor(proveedorEnEdicion.id, { fotos });
+      await eliminarFotoStorage(urlEliminada);
+      proveedorEnEdicion.fotos = fotos;
+      renderFotosEdicion();
+    } catch (error) {
+      console.error('Error al eliminar foto:', error);
+      alert('Hubo un error al eliminar la foto.');
+    }
+  }
+
+  // ── CAMBIAR ESTADO ─────────────────────
+  async function cambiarEstado(nuevoEstado) {
+    try {
+      await actualizarProveedor(proveedorEnEdicion.id, { estado: nuevoEstado });
+      proveedorEnEdicion.estado = nuevoEstado;
+      document.getElementById('editEstadoBadge').textContent = nuevoEstado;
+      document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${nuevoEstado}`;
+
+      // Actualizar caché y refrescar la cuadrícula de fondo
+      const idx = proveedoresCache.findIndex(x => x.id === proveedorEnEdicion.id);
+      if (idx !== -1) proveedoresCache[idx].estado = nuevoEstado;
+      renderGrid();
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+      alert('Hubo un error al cambiar el estado.');
+    }
+  }
+
+  // ── GUARDAR CAMBIOS DE TEXTO ────────────
+  async function guardarCambios() {
+    const datos = {
+      nombre:       document.getElementById('editNombre').value.trim(),
+      telefono:     document.getElementById('editTelefono').value.trim(),
+      email:        document.getElementById('editEmail').value.trim(),
+      categoria:    document.getElementById('editCategoria').value,
+      especialidad: document.getElementById('editEspecialidad').value.trim(),
+      ubicacion:    document.getElementById('editUbicacion').value.trim(),
+      experiencia:  document.getElementById('editExperiencia').value.trim(),
+      descripcion:  document.getElementById('editDescripcion').value.trim()
+    };
+
+    const btn = document.getElementById('btnGuardarCambios');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      await actualizarProveedor(proveedorEnEdicion.id, datos);
+      Object.assign(proveedorEnEdicion, datos);
+
+      const idx = proveedoresCache.findIndex(x => x.id === proveedorEnEdicion.id);
+      if (idx !== -1) Object.assign(proveedoresCache[idx], datos);
+      renderGrid();
+
+      document.getElementById('saveMsg').style.display = 'block';
+      setTimeout(() => { document.getElementById('saveMsg').style.display = 'none'; }, 2500);
+    } catch (error) {
+      console.error('Error al guardar cambios:', error);
+      alert('Hubo un error al guardar los cambios.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+    }
+  }
+
+  // ── ELIMINAR PROVEEDOR ──────────────────
+  async function confirmarEliminar() {
+    if (!confirm(`¿Eliminar a "${proveedorEnEdicion.nombre}" permanentemente? Esta acción no se puede deshacer.`)) return;
+
+    try {
+      // Borrar todas sus fotos de Storage
+      const fotos = proveedorEnEdicion.fotos || [];
+      for (const url of fotos) {
+        await eliminarFotoStorage(url);
+      }
+      await eliminarProveedor(proveedorEnEdicion.id);
+
+      proveedoresCache = proveedoresCache.filter(x => x.id !== proveedorEnEdicion.id);
+      cerrarEdicion();
+      renderGrid();
+    } catch (error) {
+      console.error('Error al eliminar proveedor:', error);
+      alert('Hubo un error al eliminar el proveedor.');
+    }
+  }
+
+  window.hacerLogin          = hacerLogin;
+  window.hacerLogout         = hacerLogout;
+  window.cambiarFiltro       = cambiarFiltro;
+  window.cerrarEdicion       = cerrarEdicion;
+  window.cerrarEdicionSiFondo = cerrarEdicionSiFondo;
+  window.agregarFotoAdmin    = agregarFotoAdmin;
+  window.cambiarEstado       = cambiarEstado;
+  window.guardarCambios      = guardarCambios;
+  window.confirmarEliminar   = confirmarEliminar;
+</script>
+
+</body>
+</html>
