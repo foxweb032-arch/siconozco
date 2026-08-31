@@ -271,40 +271,55 @@
 
 <!-- MODAL DE PERFIL DE PROVEEDOR -->
 <div class="modal-overlay" id="perfilOverlay" onclick="cerrarPerfilSiFondo(event)">
-  <div class="modal-box">
-    <div class="perfil-gallery" id="perfilGallery"></div>
+  <div class="modal-box perfil-box">
+    <div class="perfil-gallery-wrap">
+      <button class="perfil-gallery-arrow perfil-gallery-arrow-left" id="perfilArrowLeft" onclick="scrollGaleria(-1)">‹</button>
+      <div class="perfil-gallery" id="perfilGallery"></div>
+      <button class="perfil-gallery-arrow perfil-gallery-arrow-right" id="perfilArrowRight" onclick="scrollGaleria(1)">›</button>
+    </div>
     <div class="modal-body">
-      <div class="modal-header">
-        <h2 id="perfilNombre"></h2>
-        <button class="modal-close" onclick="cerrarPerfil()">✕</button>
-      </div>
-      <p class="modal-specialty" id="perfilEspecialidad"></p>
-      <div class="modal-meta">
-        <div class="modal-meta-row">📍 <span id="perfilUbicacion"></span></div>
-        <div class="modal-meta-row">💼 <span id="perfilExperiencia"></span></div>
-      </div>
-      <div class="perfil-rating-row">
-        <span class="perfil-rating-num" id="perfilRatingNum"></span>
-        <span class="perfil-rating-stars" id="perfilRatingStars"></span>
-        <span class="perfil-rating-count" id="perfilRatingCount"></span>
-      </div>
-      <p class="perfil-reviews-title">Reseñas de clientes</p>
-      <div id="perfilReviews"></div>
+      <div class="perfil-content-grid">
 
-      <p class="perfil-reviews-title">Deja tu reseña</p>
-      <div class="resena-stars-input" id="resenaStarsInput">
-        <span onclick="seleccionarEstrella(1)" data-n="1">☆</span>
-        <span onclick="seleccionarEstrella(2)" data-n="2">☆</span>
-        <span onclick="seleccionarEstrella(3)" data-n="3">☆</span>
-        <span onclick="seleccionarEstrella(4)" data-n="4">☆</span>
-        <span onclick="seleccionarEstrella(5)" data-n="5">☆</span>
-      </div>
-      <input type="text" id="resenaNombre" class="resena-input" placeholder="Tu nombre (opcional)">
-      <textarea id="resenaComentario" class="resena-textarea" rows="3" placeholder="Cuéntanos cómo te fue con este proveedor..."></textarea>
-      <p class="resena-error" id="resenaError" style="display:none;"></p>
-      <button class="perfil-agendar-btn" id="btnEnviarResena" onclick="enviarResenaClick()" style="background:var(--black);color:var(--white);margin-bottom:8px;">Enviar reseña</button>
+        <div class="perfil-info-col">
+          <div class="modal-header">
+            <h2 id="perfilNombre"></h2>
+            <button class="modal-close" onclick="cerrarPerfil()">✕</button>
+          </div>
+          <p class="modal-specialty" id="perfilEspecialidad"></p>
+          <div class="modal-meta">
+            <div class="modal-meta-row">📍 <span id="perfilUbicacion"></span></div>
+            <div class="modal-meta-row">💼 <span id="perfilExperiencia"></span></div>
+          </div>
+          <div class="perfil-rating-row">
+            <span class="perfil-rating-num" id="perfilRatingNum"></span>
+            <span class="perfil-rating-stars" id="perfilRatingStars"></span>
+            <span class="perfil-rating-count" id="perfilRatingCount"></span>
+          </div>
+        </div>
 
-      <button class="perfil-agendar-btn" onclick="agendarDesdePerfil()">📅 Agendar servicio</button>
+        <div class="perfil-reviews-col">
+          <p class="perfil-reviews-title">Reseñas de clientes</p>
+          <div id="perfilReviews"></div>
+
+          <p class="perfil-reviews-title">Deja tu reseña</p>
+          <div class="resena-stars-input" id="resenaStarsInput">
+            <span onclick="seleccionarEstrella(1)" data-n="1">☆</span>
+            <span onclick="seleccionarEstrella(2)" data-n="2">☆</span>
+            <span onclick="seleccionarEstrella(3)" data-n="3">☆</span>
+            <span onclick="seleccionarEstrella(4)" data-n="4">☆</span>
+            <span onclick="seleccionarEstrella(5)" data-n="5">☆</span>
+          </div>
+          <input type="text" id="resenaNombre" class="resena-input" placeholder="Tu nombre (opcional)">
+          <textarea id="resenaComentario" class="resena-textarea" rows="3" placeholder="Cuéntanos cómo te fue con este proveedor..."></textarea>
+          <p class="resena-error" id="resenaError" style="display:none;"></p>
+          <button class="perfil-agendar-btn" id="btnEnviarResena" onclick="enviarResenaClick()" style="background:var(--black);color:var(--white);margin-bottom:8px;">Enviar reseña</button>
+        </div>
+
+        <div class="perfil-agendar-wrap">
+          <button class="perfil-agendar-btn" onclick="agendarDesdePerfil()">📅 Agendar servicio</button>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
@@ -396,6 +411,48 @@
   renderProveedoresIndex();
 
   // ── PERFIL DE PROVEEDOR ───────────────
+  // ── GALERÍA DEL PERFIL ────────────────
+  // Escritorio (≥769px): todas las fotos en fila, tamaño uniforme, con flechas si hay más de 5
+  // Móvil: se queda igual — foto principal + miniaturas + "+N fotos"
+  function renderGaleria(fotos, categoria) {
+    const gallery    = document.getElementById('perfilGallery');
+    const arrowLeft  = document.getElementById('perfilArrowLeft');
+    const arrowRight = document.getElementById('perfilArrowRight');
+    const esEscritorio = window.innerWidth >= 769;
+
+    if (fotos.length === 0) {
+      const emoji = EMOJIS_CAT[categoria] || '🔧';
+      gallery.innerHTML = `<div class="perfil-gallery-placeholder">${emoji}</div>`;
+      arrowLeft.style.display  = 'none';
+      arrowRight.style.display = 'none';
+      return;
+    }
+
+    if (esEscritorio) {
+      gallery.innerHTML = fotos.map(f => `<img src="${f}" alt="">`).join('');
+      const mostrarFlechas = fotos.length > 5;
+      arrowLeft.style.display  = mostrarFlechas ? 'flex' : 'none';
+      arrowRight.style.display = mostrarFlechas ? 'flex' : 'none';
+    } else {
+      let html = `<img class="perfil-main" src="${fotos[0]}" alt="">`;
+      fotos.slice(1, 4).forEach((f, i) => {
+        if (i === 2 && fotos.length > 4) {
+          html += `<div class="perfil-gallery-more" data-extra="+${fotos.length - 4} fotos"><img src="${f}" alt=""></div>`;
+        } else {
+          html += `<img src="${f}" alt="">`;
+        }
+      });
+      gallery.innerHTML = html;
+      arrowLeft.style.display  = 'none';
+      arrowRight.style.display = 'none';
+    }
+  }
+
+  function scrollGaleria(direccion) {
+    const gallery = document.getElementById('perfilGallery');
+    gallery.scrollBy({ left: direccion * gallery.clientWidth, behavior: 'smooth' });
+  }
+
   async function abrirPerfil(card) {
     const p = proveedoresCache.find(x => x.id === card.dataset.id);
     if (!p) return;
@@ -414,22 +471,8 @@
     document.getElementById('perfilRatingStars').textContent  = '★'.repeat(estrellasLlenas) + '☆'.repeat(5 - estrellasLlenas);
     document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} ${totalResenas === 1 ? 'reseña' : 'reseñas'}` : 'Sin reseñas';
 
-    const fotos   = p.fotos || [];
-    const gallery = document.getElementById('perfilGallery');
-    if (fotos.length === 0) {
-      const emoji = EMOJIS_CAT[p.categoria] || '🔧';
-      gallery.innerHTML = `<div class="perfil-gallery-placeholder">${emoji}</div>`;
-    } else {
-      let html = `<img class="perfil-main" src="${fotos[0]}" alt="${p.nombre}">`;
-      fotos.slice(1, 4).forEach((f, i) => {
-        if (i === 2 && fotos.length > 4) {
-          html += `<div class="perfil-gallery-more" data-extra="+${fotos.length - 4} fotos"><img src="${f}" alt=""></div>`;
-        } else {
-          html += `<img src="${f}" alt="">`;
-        }
-      });
-      gallery.innerHTML = html;
-    }
+    const fotos = p.fotos || [];
+    renderGaleria(fotos, p.categoria);
 
     document.getElementById('resenaNombre').value = '';
     document.getElementById('resenaComentario').value = '';
@@ -524,6 +567,7 @@
   window.agendarDesdePerfil  = agendarDesdePerfil;
   window.seleccionarEstrella = seleccionarEstrella;
   window.enviarResenaClick   = enviarResenaClick;
+  window.scrollGaleria       = scrollGaleria;
 
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────

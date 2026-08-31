@@ -1595,3 +1595,64 @@
 }
 .admin-delete-btn:hover { background: #fdf0f0; }
 .admin-save-msg { font-size: 0.8rem; color: #155724; margin-top: 8px; display: none; text-align: center; }
+
+/* ── PERFIL DE PROVEEDOR — LAYOUT DE ESCRITORIO ── */
+.perfil-gallery-wrap { position: relative; background: var(--black); }
+.perfil-gallery-arrow {
+  display: none;
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(0,0,0,.55); color: var(--white); border: none;
+  font-size: 1.3rem; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 3;
+}
+.perfil-gallery-arrow:hover { background: rgba(0,0,0,.8); }
+.perfil-gallery-arrow-left  { left: 10px; }
+.perfil-gallery-arrow-right { right: 10px; }
+
+.perfil-content-grid { display: block; }
+.perfil-agendar-wrap { display: block; }
+
+@media (max-width: 768px) {
+  .perfil-gallery-arrow { display: none !important; }
+}
+
+@media (min-width: 769px) {
+  .perfil-box { max-width: 820px; }
+
+  .perfil-gallery {
+    display: flex;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+  .perfil-gallery img {
+    flex: 0 0 20%;
+    height: 100%;
+    object-fit: cover;
+    border-right: 2px solid var(--black);
+  }
+
+  .perfil-content-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px 28px;
+    padding: 4px 4px 0;
+  }
+  .perfil-info-col {
+    grid-column: 1; grid-row: 1;
+    border-right: 1px solid var(--light-gray);
+    padding-right: 24px;
+  }
+  .perfil-reviews-col {
+    grid-column: 2; grid-row: 1;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .perfil-agendar-wrap {
+    grid-column: 2; grid-row: 2;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .perfil-agendar-wrap .perfil-agendar-btn { width: auto; padding: 12px 30px; }
+}

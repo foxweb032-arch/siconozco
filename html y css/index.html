@@ -362,6 +362,9 @@
       const nuevoBadge = esNuevo
         ? `<span class="card-badge-new">✨ Nuevo</span>`
         : '';
+      const ratingTexto = (p.totalResenas && p.totalResenas > 0)
+        ? `★ <span style="color:var(--mid-gray)">${p.rating.toFixed(1)} · ${p.totalResenas} ${p.totalResenas === 1 ? 'reseña' : 'reseñas'}</span>`
+        : `★ <span style="color:var(--mid-gray)">Sin reseñas</span>`;
 
       const card = document.createElement('div');
       card.className    = 'provider-card';
@@ -377,7 +380,7 @@
           <h3>${p.nombre}</h3>
           <p>${p.descripcion || p.especialidad}</p>
           <div class="card-tags"><span class="tag">${categoriaLabel}</span><span class="tag">${p.especialidad}</span></div>
-          <div class="card-stars">★ <span style="color:var(--mid-gray)">Sin reseñas</span></div>
+          <div class="card-stars">${ratingTexto}</div>
           <button class="btn-agenda ${btnClass}">📅 Agendar servicio</button>
         </div>`;
 
@@ -409,7 +412,7 @@
     const estrellasLlenas = Math.round(rating);
     document.getElementById('perfilRatingNum').textContent    = totalResenas > 0 ? rating.toFixed(1) : '—';
     document.getElementById('perfilRatingStars').textContent  = '★'.repeat(estrellasLlenas) + '☆'.repeat(5 - estrellasLlenas);
-    document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} reseñas` : 'Sin reseñas';
+    document.getElementById('perfilRatingCount').textContent  = totalResenas > 0 ? `${totalResenas} ${totalResenas === 1 ? 'reseña' : 'reseñas'}` : 'Sin reseñas';
 
     const fotos   = p.fotos || [];
     const gallery = document.getElementById('perfilGallery');
