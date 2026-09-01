@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -17,6 +17,40 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 const auth    = getAuth(app);
+
+// ── COMPRIMIR IMAGEN ANTES DE SUBIR ───
+// Redimensiona a un ancho máximo y reexporta como JPEG para reducir el tamaño del archivo.
+function comprimirImagen(archivo, maxAncho = 1600, calidad = 0.8) {
+  return new Promise((resolve) => {
+    if (!archivo.type || !archivo.type.startsWith('image/')) {
+      resolve(archivo);
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(archivo);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxAncho) {
+        height = Math.round(height * (maxAncho / width));
+        width  = maxAncho;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (!blob) { resolve(archivo); return; }
+        const nombreJpg = archivo.name.replace(/\.[^.]+$/, '') + '.jpg';
+        resolve(new File([blob], nombreJpg, { type: 'image/jpeg', lastModified: Date.now() }));
+      }, 'image/jpeg', calidad);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(archivo); };
+    img.src = url;
+  });
+}
 
 // ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
@@ -155,9 +189,10 @@ async function eliminarProveedor(proveedorId) {
 
 // ── SUBIR FOTO DESDE EL PANEL (ADMIN) ──
 async function subirFotoAdmin(archivo) {
-  const nombreUnico = `${Date.now()}-${archivo.name}`;
+  const comprimido  = await comprimirImagen(archivo);
+  const nombreUnico = `${Date.now()}-${comprimido.name}`;
   const storageRef  = ref(storage, `proveedores/${nombreUnico}`);
-  await uploadBytes(storageRef, archivo);
+  await uploadBytes(storageRef, comprimido);
   return getDownloadURL(storageRef);
 }
 
@@ -168,6 +203,30 @@ async function eliminarFotoStorage(url) {
     await deleteObject(fotoRef);
   } catch (error) {
     console.warn('No se pudo eliminar la foto de Storage (puede que ya no exista):', error);
+  }
+}
+
+const DIAS_SEMANA = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'];
+
+// ── ASEGURAR HORARIO VACÍO AL APROBAR (ADMIN) ──
+// Crea el documento de horarios con el mismo ID del proveedor SOLO si no existe todavía,
+// para no pisar horarios que el dueño ya haya cargado a mano.
+async function asegurarHorarioProveedor(proveedorId) {
+  const horarioRef = doc(db, 'horarios', proveedorId);
+  const snap = await getDoc(horarioRef);
+  if (snap.exists()) return;
+
+  const vacio = {};
+  DIAS_SEMANA.forEach(d => { vacio[d] = []; });
+  await setDoc(horarioRef, vacio);
+}
+
+// ── ELIMINAR HORARIO AL ELIMINAR PROVEEDOR (ADMIN) ──
+async function eliminarHorarioProveedor(proveedorId) {
+  try {
+    await deleteDoc(doc(db, 'horarios', proveedorId));
+  } catch (error) {
+    console.warn('No se pudo eliminar el horario (puede que no existiera):', error);
   }
 }
 
@@ -230,7 +289,8 @@ export {
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
-  subirFotoAdmin, eliminarFotoStorage,
+  subirFotoAdmin, eliminarFotoStorage, comprimirImagen,
+  asegurarHorarioProveedor, eliminarHorarioProveedor,
   guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
   guardarMensaje, cargarMensajes, marcarMensajeRespondido
 };

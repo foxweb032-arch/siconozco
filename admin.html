@@ -159,6 +159,7 @@
     cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
     subirFotoAdmin, eliminarFotoStorage,
     cargarResenas, eliminarResena,
+    asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
     cargarMensajes, marcarMensajeRespondido
   } from './firebase.js';
@@ -601,6 +602,10 @@
       document.getElementById('editEstadoBadge').textContent = nuevoEstado;
       document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${nuevoEstado}`;
 
+      if (nuevoEstado === 'aprobado') {
+        await asegurarHorarioProveedor(proveedorEnEdicion.id);
+      }
+
       // Actualizar caché y refrescar la cuadrícula de fondo
       const idx = proveedoresCache.findIndex(x => x.id === proveedorEnEdicion.id);
       if (idx !== -1) proveedoresCache[idx].estado = nuevoEstado;
@@ -658,6 +663,7 @@
         await eliminarFotoStorage(url);
       }
       await eliminarProveedor(proveedorEnEdicion.id);
+      await eliminarHorarioProveedor(proveedorEnEdicion.id);
 
       proveedoresCache = proveedoresCache.filter(x => x.id !== proveedorEnEdicion.id);
       cerrarEdicion();

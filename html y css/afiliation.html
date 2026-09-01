@@ -16,7 +16,6 @@
   <ul class="nav-links">
     <li><a href="index.html">Inicio</a></li>
     <li><a href="proveedores.html">Proveedores</a></li>
-    <li><a href="#">Categorías</a></li>
     <li><a href="afiliation.html">Publicar servicio</a></li>
     <li><a href="contacto.html" class="btn-contact">Contacto</a></li>
   </ul>
@@ -29,7 +28,6 @@
   <button class="close-btn" onclick="toggleMenu()">✕</button>
   <a href="index.html" onclick="toggleMenu()">Inicio</a>
   <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
-  <a href="#" onclick="toggleMenu()">Categorías</a>
   <a href="afiliation.html" onclick="toggleMenu()">Publicar servicio</a>
   <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
 </div>
@@ -161,13 +159,14 @@
 
       <!-- TÉRMINOS -->
       <div class="terms-check-area" id="termsCheckArea" onclick="toggleCheck()">
-        <input type="checkbox" id="aceptaTerminos" readonly>
+        <input type="checkbox" id="aceptaTerminos" readonly onclick="event.preventDefault()">
         <label for="aceptaTerminos">
           He leído y acepto los <a href="#" onclick="abrirTerminos(event)">Términos y Condiciones</a> de SiConozco, incluyendo la comisión del <strong>13%</strong> por cada servicio contratado a través de la plataforma.
-        </label>
+               </label>
       </div>
+      <p style="font-size:13px; color:#6B6B6B; margin-top:6px;">👆 Da clic aquí para leer y aceptar los términos — así se marca la casilla</p>
       <p class="terms-err" id="errTerminos">Debes leer y aceptar los términos y condiciones</p>
-
+	  
       <button class="afil-submit" onclick="enviarAfiliacion()">Enviar solicitud de afiliación</button>
 
     </div>
