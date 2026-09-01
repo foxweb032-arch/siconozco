@@ -130,9 +130,7 @@
 
 </div>
 
-<script type="module">
-  import { guardarMensaje } from './firebase.js';
-
+<script>
   function toggleMenu() {
     const menu = document.getElementById('mobileMenu');
     menu.classList.toggle('open');
@@ -187,18 +185,6 @@
         headers: { 'Accept': 'application/json' }
       });
       if (res.ok) {
-        try {
-          await guardarMensaje({
-            nombre,
-            email,
-            telefono: document.getElementById('cTel').value.trim(),
-            asunto,
-            mensaje
-          });
-        } catch (error) {
-          console.error('Error al guardar el mensaje en Firestore:', error);
-        }
-
         document.getElementById('contactFormContent').style.display = 'none';
         document.getElementById('contactOk').style.display = 'block';
       } else {
@@ -212,9 +198,6 @@
       btn.textContent = 'Enviar mensaje';
     }
   }
-
-  window.toggleMenu     = toggleMenu;
-  window.enviarContacto = enviarContacto;
 </script>
 
 </body>
