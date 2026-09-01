@@ -89,6 +89,35 @@ async function enviarResena(proveedorId, calificacion, comentario, nombreCliente
   });
 }
 
+// ── ELIMINAR RESEÑA Y RECALCULAR PROMEDIO (ADMIN) ──
+async function eliminarResena(proveedorId, resenaId) {
+  const proveedorRef = doc(db, 'proveedores', proveedorId);
+  const resenaRef     = doc(db, 'proveedores', proveedorId, 'resenas', resenaId);
+
+  await runTransaction(db, async (transaction) => {
+    const resenaSnap = await transaction.get(resenaRef);
+    if (!resenaSnap.exists()) throw new Error('Reseña no encontrada');
+    const calificacion = resenaSnap.data().calificacion || 0;
+
+    const proveedorSnap = await transaction.get(proveedorRef);
+    if (!proveedorSnap.exists()) throw new Error('Proveedor no encontrado');
+
+    const data        = proveedorSnap.data();
+    const ratingActual = data.rating || 0;
+    const totalActual  = data.totalResenas || 0;
+    const nuevoTotal   = Math.max(totalActual - 1, 0);
+    const nuevoRating  = nuevoTotal > 0
+      ? ((ratingActual * totalActual) - calificacion) / nuevoTotal
+      : 0;
+
+    transaction.delete(resenaRef);
+    transaction.update(proveedorRef, {
+      rating: nuevoRating,
+      totalResenas: nuevoTotal
+    });
+  });
+}
+
 // ── AUTENTICACIÓN (ADMIN) ─────────────
 async function loginAdmin(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
@@ -198,7 +227,7 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 
 export {
   db, auth,
-  cargarHorarios, cargarProveedores, cargarResenas, enviarResena,
+  cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
   subirFotoAdmin, eliminarFotoStorage,
