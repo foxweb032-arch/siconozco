@@ -175,6 +175,7 @@
       <span>🎉</span>
       <h2>¡Solicitud recibida!</h2>
       <p>Gracias por registrarte. Revisaremos tu información y nos pondremos en contacto contigo en un plazo de 24 a 48 horas para confirmar tu afiliación.</p>
+      <p class="afil-folio-box">Tu número de folio es <strong id="afilFolioTexto">—</strong><br>Guárdalo por si necesitas hacer alguna aclaración con nosotros.</p>
     </div>
   </div>
 </div>
@@ -221,7 +222,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import { comprimirImagen } from './firebase.js';
+  import { comprimirImagen, registrarProveedor } from './firebase.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
@@ -376,8 +377,8 @@
 
       btn.textContent = 'Enviando...';
 
-      // 2. Guardar en Firestore con estado "pendiente"
-      await addDoc(collection(db, 'proveedores'), {
+      // 2. Guardar en Firestore con estado "pendiente" y generar folio corto
+      const { folio } = await registrarProveedor({
         nombre,
         telefono:    tel,
         email,
@@ -386,11 +387,10 @@
         especialidad,
         ubicacion,
         descripcion,
-        fotos:       urlsFotos,
-        estado:      'pendiente',
-        fechaRegistro: new Date().toISOString()
+        fotos:       urlsFotos
       });
 
+      document.getElementById('afilFolioTexto').textContent = folio;
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('afilOk').style.display      = 'block';
 

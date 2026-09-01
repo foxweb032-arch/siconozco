@@ -52,6 +52,33 @@ function comprimirImagen(archivo, maxAncho = 1600, calidad = 0.8) {
   });
 }
 
+// ── REGISTRAR PROVEEDOR CON FOLIO SECUENCIAL ──
+// Genera un folio corto (SC-0001, SC-0002...) usando un contador atómico,
+// y crea el documento del proveedor con ese folio incluido.
+async function registrarProveedor(datos) {
+  const contadorRef       = doc(db, 'contadores', 'proveedores');
+  const nuevoProveedorRef = doc(collection(db, 'proveedores'));
+
+  const folio = await runTransaction(db, async (transaction) => {
+    const contadorSnap = await transaction.get(contadorRef);
+    const actual        = contadorSnap.exists() ? (contadorSnap.data().siguiente || 0) : 0;
+    const siguiente      = actual + 1;
+    const folioGenerado  = `SC-${String(siguiente).padStart(4, '0')}`;
+
+    transaction.set(contadorRef, { siguiente });
+    transaction.set(nuevoProveedorRef, {
+      ...datos,
+      folio: folioGenerado,
+      estado: 'pendiente',
+      fechaRegistro: new Date().toISOString()
+    });
+
+    return folioGenerado;
+  });
+
+  return { id: nuevoProveedorRef.id, folio };
+}
+
 // ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
   try {
@@ -230,6 +257,12 @@ async function eliminarHorarioProveedor(proveedorId) {
   }
 }
 
+// ── GUARDAR HORARIO DE UN PROVEEDOR (ADMIN) ──
+async function guardarHorario(proveedorId, datosHorario) {
+  const horarioRef = doc(db, 'horarios', proveedorId);
+  await setDoc(horarioRef, datosHorario);
+}
+
 // ── RESERVACIONES ──────────────────────
 async function guardarReservacion(datos) {
   await addDoc(collection(db, 'reservaciones'), {
@@ -286,11 +319,12 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 
 export {
   db, auth,
+  registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
   subirFotoAdmin, eliminarFotoStorage, comprimirImagen,
-  asegurarHorarioProveedor, eliminarHorarioProveedor,
+  asegurarHorarioProveedor, eliminarHorarioProveedor, guardarHorario,
   guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
   guardarMensaje, cargarMensajes, marcarMensajeRespondido
 };
