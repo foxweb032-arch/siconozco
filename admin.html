@@ -30,9 +30,9 @@
   </div>
 
   <div class="admin-main-tabs">
-    <button class="admin-main-tab activa" data-seccion="proveedores" onclick="cambiarSeccion('proveedores')">Proveedores</button>
-    <button class="admin-main-tab" data-seccion="reservaciones" onclick="cambiarSeccion('reservaciones')">Reservaciones</button>
-    <button class="admin-main-tab" data-seccion="mensajes" onclick="cambiarSeccion('mensajes')">Mensajes de contacto</button>
+    <button class="admin-main-tab activa" data-seccion="proveedores" onclick="cambiarSeccion('proveedores')">Proveedores <span class="admin-tab-badge" id="badgeProveedores"></span></button>
+    <button class="admin-main-tab" data-seccion="reservaciones" onclick="cambiarSeccion('reservaciones')">Reservaciones <span class="admin-tab-badge" id="badgeReservaciones"></span></button>
+    <button class="admin-main-tab" data-seccion="mensajes" onclick="cambiarSeccion('mensajes')">Mensajes de contacto <span class="admin-tab-badge" id="badgeMensajes"></span></button>
   </div>
 
   <div id="seccionProveedores">
@@ -169,7 +169,8 @@
     asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarHorarios, guardarHorario,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
-    cargarMensajes, marcarMensajeRespondido
+    cargarMensajes, marcarMensajeRespondido,
+    escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
   } from './firebase.js';
 
   let proveedoresCache = [];
@@ -179,6 +180,9 @@
   let mensajesCache      = [];
   let seccionActual      = 'proveedores';
   let reservaFiltro      = 'todas';
+  let unsubProveedores   = null;
+  let unsubReservaciones = null;
+  let unsubMensajes      = null;
 
   // ── LOGIN / LOGOUT ─────────────────────
   onAuthChange((user) => {
@@ -186,11 +190,36 @@
       document.getElementById('loginWrap').style.display = 'none';
       document.getElementById('dashboardWrap').style.display = 'block';
       cargarYRenderizar();
+      iniciarListenersNotificaciones();
     } else {
       document.getElementById('loginWrap').style.display = 'flex';
       document.getElementById('dashboardWrap').style.display = 'none';
+      detenerListenersNotificaciones();
     }
   });
+
+  function iniciarListenersNotificaciones() {
+    detenerListenersNotificaciones();
+    unsubProveedores   = escucharPendientesProveedores(n => actualizarBadge('badgeProveedores', n));
+    unsubReservaciones = escucharPendientesReservaciones(n => actualizarBadge('badgeReservaciones', n));
+    unsubMensajes       = escucharPendientesMensajes(n => actualizarBadge('badgeMensajes', n));
+  }
+
+  function detenerListenersNotificaciones() {
+    if (unsubProveedores)   { unsubProveedores(); unsubProveedores = null; }
+    if (unsubReservaciones) { unsubReservaciones(); unsubReservaciones = null; }
+    if (unsubMensajes)      { unsubMensajes(); unsubMensajes = null; }
+  }
+
+  function actualizarBadge(id, n) {
+    const el = document.getElementById(id);
+    if (n > 0) {
+      el.textContent   = n > 99 ? '99+' : n;
+      el.style.display = 'inline-flex';
+    } else {
+      el.style.display = 'none';
+    }
+  }
 
   async function hacerLogin() {
     const email    = document.getElementById('loginEmail').value.trim();

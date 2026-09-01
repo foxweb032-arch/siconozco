@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -263,6 +263,32 @@ async function guardarHorario(proveedorId, datosHorario) {
   await setDoc(horarioRef, datosHorario);
 }
 
+// ── ESCUCHAR CONTADORES EN TIEMPO REAL (ADMIN) ──
+// Cada función devuelve un "unsubscribe" que hay que llamar al cerrar sesión.
+function escucharPendientesProveedores(callback) {
+  const q = query(collection(db, 'proveedores'), where('estado', '==', 'pendiente'));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando proveedores pendientes:', error)
+  );
+}
+
+function escucharPendientesReservaciones(callback) {
+  const q = query(collection(db, 'reservaciones'), where('estado', '==', 'pendiente'));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando reservaciones pendientes:', error)
+  );
+}
+
+function escucharPendientesMensajes(callback) {
+  const q = query(collection(db, 'mensajes'), where('respondido', '==', false));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando mensajes pendientes:', error)
+  );
+}
+
 // ── RESERVACIONES ──────────────────────
 async function guardarReservacion(datos) {
   await addDoc(collection(db, 'reservaciones'), {
@@ -326,6 +352,7 @@ export {
   subirFotoAdmin, eliminarFotoStorage, comprimirImagen,
   asegurarHorarioProveedor, eliminarHorarioProveedor, guardarHorario,
   guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
-  guardarMensaje, cargarMensajes, marcarMensajeRespondido
+  guardarMensaje, cargarMensajes, marcarMensajeRespondido,
+  escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
 };
 
