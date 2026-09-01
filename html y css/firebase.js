@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -142,11 +142,63 @@ async function eliminarFotoStorage(url) {
   }
 }
 
+// ── RESERVACIONES ──────────────────────
+async function guardarReservacion(datos) {
+  await addDoc(collection(db, 'reservaciones'), {
+    ...datos,
+    fechaCreacion: new Date().toISOString(),
+    estado: 'pendiente'
+  });
+}
+
+async function cargarReservaciones() {
+  try {
+    const snapshot = await getDocs(collection(db, 'reservaciones'));
+    return snapshot.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+  } catch (error) {
+    console.error('Error cargando reservaciones:', error);
+    return [];
+  }
+}
+
+async function marcarReservacion(reservacionId, estado) {
+  await updateDoc(doc(db, 'reservaciones', reservacionId), { estado });
+}
+
+// ── MENSAJES DE CONTACTO ───────────────
+async function guardarMensaje(datos) {
+  await addDoc(collection(db, 'mensajes'), {
+    ...datos,
+    fechaCreacion: new Date().toISOString(),
+    respondido: false
+  });
+}
+
+async function cargarMensajes() {
+  try {
+    const snapshot = await getDocs(collection(db, 'mensajes'));
+    return snapshot.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+  } catch (error) {
+    console.error('Error cargando mensajes:', error);
+    return [];
+  }
+}
+
+async function marcarMensajeRespondido(mensajeId, respondido) {
+  await updateDoc(doc(db, 'mensajes', mensajeId), { respondido });
+}
+
 export {
   db, auth,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena,
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
-  subirFotoAdmin, eliminarFotoStorage
+  subirFotoAdmin, eliminarFotoStorage,
+  guardarReservacion, cargarReservaciones, marcarReservacion,
+  guardarMensaje, cargarMensajes, marcarMensajeRespondido
 };
 

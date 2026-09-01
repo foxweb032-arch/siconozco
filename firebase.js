@@ -167,6 +167,10 @@ async function marcarReservacion(reservacionId, estado) {
   await updateDoc(doc(db, 'reservaciones', reservacionId), { estado });
 }
 
+async function actualizarReservacion(reservacionId, datos) {
+  await updateDoc(doc(db, 'reservaciones', reservacionId), datos);
+}
+
 // ── MENSAJES DE CONTACTO ───────────────
 async function guardarMensaje(datos) {
   await addDoc(collection(db, 'mensajes'), {
@@ -198,7 +202,7 @@ export {
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
   subirFotoAdmin, eliminarFotoStorage,
-  guardarReservacion, cargarReservaciones, marcarReservacion,
+  guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
   guardarMensaje, cargarMensajes, marcarMensajeRespondido
 };
 
