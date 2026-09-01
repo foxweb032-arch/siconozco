@@ -1656,3 +1656,28 @@
   }
   .perfil-agendar-wrap .perfil-agendar-btn { width: auto; padding: 12px 30px; }
 }
+
+/* ── ADMIN: SECCIONES PRINCIPALES (Reservaciones / Mensajes) ── */
+.admin-main-tabs { display: flex; gap: 10px; padding: 16px 32px 0; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+.admin-main-tab {
+  background: none; border: none; padding: 12px 4px; font-size: 0.9rem; font-weight: 600;
+  color: var(--mid-gray); cursor: pointer; border-bottom: 3px solid transparent;
+}
+.admin-main-tab.activa { color: var(--black); border-bottom-color: var(--yellow); }
+
+.admin-list { display: flex; flex-direction: column; gap: 12px; padding: 20px 32px 40px; }
+.admin-list-item { background: var(--white); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--card-shadow); }
+.admin-list-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.admin-list-title { font-size: 0.95rem; font-weight: 700; color: var(--black); }
+.admin-list-date { font-size: 0.72rem; color: var(--mid-gray); white-space: nowrap; }
+.admin-list-body { font-size: 0.83rem; color: var(--dark-gray); margin-top: 8px; line-height: 1.7; }
+.admin-list-body strong { color: var(--black); }
+.admin-list-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.admin-list-actions button, .admin-list-actions a {
+  border: none; border-radius: 8px; padding: 7px 14px; font-size: 0.78rem; font-weight: 700;
+  cursor: pointer; text-decoration: none; display: inline-block;
+}
+.admin-btn-whatsapp-link { background: #25D366; color: #fff; }
+.admin-btn-email-link { background: var(--black); color: #fff; }
+.admin-btn-mark { background: var(--light-gray); color: var(--dark-gray); }
+.admin-btn-mark.activo { background: #D4EDDA; color: #155724; }

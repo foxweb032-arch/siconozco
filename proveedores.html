@@ -250,7 +250,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena } from './firebase.js';
+  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
 
@@ -267,6 +267,7 @@
   let perfilCardActual  = null;
   let perfilProveedorId = null;
   let resenaEstrellas   = 0;
+  let proveedorActualId = null;
 
   // ── RENDER PROVEEDORES DESDE FIRESTORE ──
   const EMOJIS_CAT = {
@@ -550,6 +551,7 @@
   // ── ABRIR MODAL ───────────────────────
   async function abrirModal(card) {
     const id = card.dataset.id;
+    proveedorActualId = id;
 
     document.getElementById('modalNombre').textContent       = card.querySelector('h3').textContent;
     document.getElementById('modalEspecialidad').textContent = card.querySelector('.specialty').textContent;
@@ -739,8 +741,29 @@
     });
     if (res.ok) {
       const nombre    = document.getElementById('fNombre').value;
+      const telefono  = document.getElementById('fTel').value;
+      const direccion = document.getElementById('fDireccion').value;
+      const desc      = document.getElementById('fDesc').value;
       const proveedor = document.getElementById('formProveedor').value;
+      const categoria = document.getElementById('formCategoria').value;
       const fechaHora = document.getElementById('formFechaHora').value;
+
+      try {
+        await guardarReservacion({
+          proveedorId: proveedorActualId,
+          proveedorNombre: proveedor,
+          categoria,
+          clienteNombre: nombre,
+          clienteTelefono: telefono,
+          direccion,
+          descripcion: desc,
+          fechaHora,
+          canal: 'email'
+        });
+      } catch (error) {
+        console.error('Error al guardar la reservación en Firestore:', error);
+      }
+
       document.getElementById('confirmResumen').innerHTML =
         `<strong>${nombre}</strong>, tu cita con <strong>${proveedor}</strong><br>fue agendada para el<br><strong>${fechaHora}</strong>`;
       irPaso3();
@@ -751,8 +774,9 @@
   });
 
   // ── WHATSAPP ──────────────────────────
-  function enviarWhatsApp() {
+  async function enviarWhatsApp() {
     const proveedor = document.getElementById('formProveedor').value;
+    const categoria = document.getElementById('formCategoria').value;
     const fechaHora = document.getElementById('formFechaHora').value;
     const nombre    = document.getElementById('fNombre').value;
     const telefono  = document.getElementById('fTel').value;
@@ -762,6 +786,22 @@
     if (!nombre || !telefono || !direccion || !desc) {
       alert('Por favor llena todos los campos antes de enviar por WhatsApp.');
       return;
+    }
+
+    try {
+      await guardarReservacion({
+        proveedorId: proveedorActualId,
+        proveedorNombre: proveedor,
+        categoria,
+        clienteNombre: nombre,
+        clienteTelefono: telefono,
+        direccion,
+        descripcion: desc,
+        fechaHora,
+        canal: 'whatsapp'
+      });
+    } catch (error) {
+      console.error('Error al guardar la reservación en Firestore:', error);
     }
 
     const msg =

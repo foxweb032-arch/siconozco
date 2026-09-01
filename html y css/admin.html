@@ -29,35 +29,15 @@
     <button class="admin-logout-btn" onclick="hacerLogout()">Cerrar sesión</button>
   </div>
 
-  <div class="admin-main-tabs">
-    <button class="admin-main-tab activa" data-seccion="proveedores" onclick="cambiarSeccion('proveedores')">Proveedores</button>
-    <button class="admin-main-tab" data-seccion="reservaciones" onclick="cambiarSeccion('reservaciones')">Reservaciones</button>
-    <button class="admin-main-tab" data-seccion="mensajes" onclick="cambiarSeccion('mensajes')">Mensajes de contacto</button>
+  <div class="admin-tabs" id="adminTabs">
+    <button class="admin-tab activa" data-estado="todos" onclick="cambiarFiltro('todos')">Todos</button>
+    <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
+    <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
+    <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
   </div>
 
-  <div id="seccionProveedores">
-    <div class="admin-tabs" id="adminTabs">
-      <button class="admin-tab activa" data-estado="todos" onclick="cambiarFiltro('todos')">Todos</button>
-      <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
-      <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
-      <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
-    </div>
-
-    <div class="admin-grid" id="adminGrid">
-      <p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">Cargando proveedores…</p>
-    </div>
-  </div>
-
-  <div id="seccionReservaciones" style="display:none;">
-    <div class="admin-list" id="reservacionesList">
-      <p style="text-align:center; color:var(--mid-gray); padding:30px;">Cargando reservaciones…</p>
-    </div>
-  </div>
-
-  <div id="seccionMensajes" style="display:none;">
-    <div class="admin-list" id="mensajesList">
-      <p style="text-align:center; color:var(--mid-gray); padding:30px;">Cargando mensajes…</p>
-    </div>
+  <div class="admin-grid" id="adminGrid">
+    <p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">Cargando proveedores…</p>
   </div>
 </div>
 
@@ -140,17 +120,12 @@
   import {
     onAuthChange, loginAdmin, logoutAdmin,
     cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
-    subirFotoAdmin, eliminarFotoStorage,
-    cargarReservaciones, marcarReservacion,
-    cargarMensajes, marcarMensajeRespondido
+    subirFotoAdmin, eliminarFotoStorage
   } from './firebase.js';
 
   let proveedoresCache = [];
   let filtroActual      = 'todos';
   let proveedorEnEdicion = null; // objeto completo del proveedor abierto
-  let reservacionesCache = [];
-  let mensajesCache      = [];
-  let seccionActual      = 'proveedores';
 
   // ── LOGIN / LOGOUT ─────────────────────
   onAuthChange((user) => {
@@ -235,135 +210,6 @@
       card.querySelector('.admin-manage-btn').addEventListener('click', () => abrirEdicion(p.id));
       grid.appendChild(card);
     });
-  }
-
-  // ── CAMBIO DE SECCIÓN PRINCIPAL ─────────
-  function cambiarSeccion(seccion) {
-    seccionActual = seccion;
-    document.querySelectorAll('.admin-main-tab').forEach(t => {
-      t.classList.toggle('activa', t.dataset.seccion === seccion);
-    });
-    document.getElementById('seccionProveedores').style.display    = seccion === 'proveedores'    ? 'block' : 'none';
-    document.getElementById('seccionReservaciones').style.display  = seccion === 'reservaciones'  ? 'block' : 'none';
-    document.getElementById('seccionMensajes').style.display       = seccion === 'mensajes'        ? 'block' : 'none';
-
-    if (seccion === 'reservaciones' && reservacionesCache.length === 0) cargarYRenderizarReservaciones();
-    if (seccion === 'mensajes'      && mensajesCache.length === 0)      cargarYRenderizarMensajes();
-  }
-
-  function formatearFecha(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  function soloDigitos(str) {
-    return (str || '').replace(/\D/g, '');
-  }
-
-  // ── RESERVACIONES ────────────────────────
-  async function cargarYRenderizarReservaciones() {
-    reservacionesCache = await cargarReservaciones();
-    renderReservaciones();
-  }
-
-  function renderReservaciones() {
-    const cont = document.getElementById('reservacionesList');
-    if (reservacionesCache.length === 0) {
-      cont.innerHTML = '<p style="text-align:center; color:var(--mid-gray); padding:30px;">Aún no hay reservaciones.</p>';
-      return;
-    }
-
-    cont.innerHTML = reservacionesCache.map(r => `
-      <div class="admin-list-item">
-        <div class="admin-list-top">
-          <span class="admin-list-title">${r.clienteNombre || 'Sin nombre'} → ${r.proveedorNombre || ''}</span>
-          <span class="admin-list-date">${formatearFecha(r.fechaCreacion)}</span>
-        </div>
-        <div class="admin-list-body">
-          <strong>Teléfono:</strong> ${r.clienteTelefono || '—'}<br>
-          <strong>Dirección:</strong> ${r.direccion || '—'}<br>
-          <strong>Horario solicitado:</strong> ${r.fechaHora || '—'}<br>
-          <strong>Categoría:</strong> ${r.categoria || '—'}<br>
-          <strong>Descripción:</strong> ${r.descripcion || '—'}<br>
-          <strong>Canal:</strong> ${r.canal === 'whatsapp' ? 'WhatsApp' : 'Email'} ·
-          <strong>Estado:</strong> <span class="admin-status-badge admin-status-${r.estado === 'confirmada' ? 'aprobado' : (r.estado === 'cancelada' ? 'rechazado' : 'pendiente')}">${r.estado || 'pendiente'}</span>
-        </div>
-        <div class="admin-list-actions">
-          ${r.clienteTelefono ? `<a class="admin-btn-whatsapp-link" href="https://wa.me/52${soloDigitos(r.clienteTelefono)}" target="_blank">WhatsApp</a>` : ''}
-          <button class="admin-btn-mark ${r.estado === 'confirmada' ? 'activo' : ''}" data-id="${r.id}" data-estado="confirmada">Confirmar</button>
-          <button class="admin-btn-mark ${r.estado === 'cancelada' ? 'activo' : ''}" data-id="${r.id}" data-estado="cancelada">Cancelar</button>
-        </div>
-      </div>
-    `).join('');
-
-    cont.querySelectorAll('.admin-btn-mark').forEach(btn => {
-      btn.addEventListener('click', () => actualizarEstadoReservacion(btn.dataset.id, btn.dataset.estado));
-    });
-  }
-
-  async function actualizarEstadoReservacion(id, estado) {
-    try {
-      await marcarReservacion(id, estado);
-      const r = reservacionesCache.find(x => x.id === id);
-      if (r) r.estado = estado;
-      renderReservaciones();
-    } catch (error) {
-      console.error('Error al actualizar reservación:', error);
-      alert('Hubo un error al actualizar la reservación.');
-    }
-  }
-
-  // ── MENSAJES DE CONTACTO ─────────────────
-  async function cargarYRenderizarMensajes() {
-    mensajesCache = await cargarMensajes();
-    renderMensajes();
-  }
-
-  function renderMensajes() {
-    const cont = document.getElementById('mensajesList');
-    if (mensajesCache.length === 0) {
-      cont.innerHTML = '<p style="text-align:center; color:var(--mid-gray); padding:30px;">Aún no hay mensajes de contacto.</p>';
-      return;
-    }
-
-    cont.innerHTML = mensajesCache.map(m => `
-      <div class="admin-list-item" style="${m.respondido ? 'opacity:.6;' : ''}">
-        <div class="admin-list-top">
-          <span class="admin-list-title">${m.nombre || 'Sin nombre'} — ${m.asunto || 'Sin asunto'}</span>
-          <span class="admin-list-date">${formatearFecha(m.fechaCreacion)}</span>
-        </div>
-        <div class="admin-list-body">
-          <strong>Email:</strong> ${m.email || '—'}<br>
-          ${m.telefono ? `<strong>Teléfono:</strong> ${m.telefono}<br>` : ''}
-          <strong>Mensaje:</strong> ${m.mensaje || '—'}
-        </div>
-        <div class="admin-list-actions">
-          ${m.email ? `<a class="admin-btn-email-link" href="mailto:${m.email}?subject=Re: ${encodeURIComponent(m.asunto || 'tu mensaje')}">Responder por email</a>` : ''}
-          ${m.telefono ? `<a class="admin-btn-whatsapp-link" href="https://wa.me/52${soloDigitos(m.telefono)}" target="_blank">WhatsApp</a>` : ''}
-          <button class="admin-btn-mark ${m.respondido ? 'activo' : ''}" data-id="${m.id}">
-            ${m.respondido ? '✓ Respondido' : 'Marcar como respondido'}
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    cont.querySelectorAll('.admin-btn-mark').forEach(btn => {
-      btn.addEventListener('click', () => toggleRespondido(btn.dataset.id));
-    });
-  }
-
-  async function toggleRespondido(id) {
-    const m = mensajesCache.find(x => x.id === id);
-    if (!m) return;
-    try {
-      await marcarMensajeRespondido(id, !m.respondido);
-      m.respondido = !m.respondido;
-      renderMensajes();
-    } catch (error) {
-      console.error('Error al actualizar mensaje:', error);
-      alert('Hubo un error al actualizar el mensaje.');
-    }
   }
 
   // ── MODAL DE EDICIÓN ───────────────────
@@ -525,7 +371,6 @@
 
   window.hacerLogin          = hacerLogin;
   window.hacerLogout         = hacerLogout;
-  window.cambiarSeccion      = cambiarSeccion;
   window.cambiarFiltro       = cambiarFiltro;
   window.cerrarEdicion       = cerrarEdicion;
   window.cerrarEdicionSiFondo = cerrarEdicionSiFondo;
