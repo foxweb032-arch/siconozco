@@ -92,6 +92,11 @@
         <input type="file" id="editAddPhotoInput" accept="image/*" onchange="agregarFotoAdmin(event)">
       </label>
 
+      <p class="perfil-reviews-title" id="editResenasTitle">Reseñas</p>
+      <div class="admin-resenas-list" id="editResenasList">
+        <p class="perfil-empty-reviews">Cargando reseñas…</p>
+      </div>
+
       <p class="perfil-reviews-title">Datos del proveedor</p>
       <div class="admin-field">
         <label>Nombre</label>
@@ -148,6 +153,7 @@
     onAuthChange, loginAdmin, logoutAdmin,
     cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
     subirFotoAdmin, eliminarFotoStorage,
+    cargarResenas, eliminarResena,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
     cargarMensajes, marcarMensajeRespondido
   } from './firebase.js';
@@ -433,6 +439,7 @@
 
     document.getElementById('saveMsg').style.display = 'none';
     renderFotosEdicion();
+    cargarYRenderResenasEdicion(p.id);
 
     document.getElementById('editOverlay').classList.add('activo');
   }
@@ -492,6 +499,74 @@
     } catch (error) {
       console.error('Error al eliminar foto:', error);
       alert('Hubo un error al eliminar la foto.');
+    }
+  }
+
+  // ── RESEÑAS (dentro del modal de gestión) ──
+  function formatearFechaResena(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  async function cargarYRenderResenasEdicion(proveedorId) {
+    const cont = document.getElementById('editResenasList');
+    const titulo = document.getElementById('editResenasTitle');
+    cont.innerHTML = '<p class="perfil-empty-reviews">Cargando reseñas…</p>';
+
+    const resenas = await cargarResenas(proveedorId);
+    // Evita pisar la vista si el admin ya cambió de proveedor mientras cargaba
+    if (!proveedorEnEdicion || proveedorEnEdicion.id !== proveedorId) return;
+
+    titulo.textContent = `Reseñas (${resenas.length})`;
+
+    if (resenas.length === 0) {
+      cont.innerHTML = '<p class="perfil-empty-reviews">Este proveedor aún no tiene reseñas.</p>';
+      return;
+    }
+
+    cont.innerHTML = resenas.map(r => `
+      <div class="admin-resena-item">
+        <div class="admin-resena-top">
+          <div class="admin-resena-info">
+            <div class="review-header">
+              <span class="review-author">${r.clienteNombre || 'Cliente anónimo'}</span>
+              <span class="review-stars">${'★'.repeat(r.calificacion)}${'☆'.repeat(5 - r.calificacion)}</span>
+            </div>
+            <p class="review-comment">${r.comentario || ''}</p>
+            <span class="admin-resena-fecha">${formatearFechaResena(r.fecha)}</span>
+          </div>
+          <button class="admin-resena-delete" data-id="${r.id}">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+
+    cont.querySelectorAll('.admin-resena-delete').forEach(btn => {
+      btn.addEventListener('click', () => confirmarEliminarResena(btn.dataset.id, proveedorId));
+    });
+  }
+
+  async function confirmarEliminarResena(resenaId, proveedorId) {
+    if (!confirm('¿Eliminar esta reseña permanentemente? El promedio del proveedor se recalculará.')) return;
+
+    try {
+      await eliminarResena(proveedorId, resenaId);
+
+      // Refrescar rating/totalResenas locales (la transacción ya los recalculó en Firestore)
+      const proveedorActualizado = await cargarTodosLosProveedores();
+      const actualizado = proveedorActualizado.find(x => x.id === proveedorId);
+      if (actualizado) {
+        proveedoresCache = proveedorActualizado;
+        if (proveedorEnEdicion && proveedorEnEdicion.id === proveedorId) {
+          proveedorEnEdicion.rating       = actualizado.rating;
+          proveedorEnEdicion.totalResenas = actualizado.totalResenas;
+        }
+      }
+
+      cargarYRenderResenasEdicion(proveedorId);
+    } catch (error) {
+      console.error('Error al eliminar reseña:', error);
+      alert('Hubo un error al eliminar la reseña.');
     }
   }
 

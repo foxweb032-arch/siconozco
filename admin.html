@@ -79,6 +79,11 @@
 
       <span class="admin-status-badge" id="editEstadoBadge"></span>
 
+      <div class="admin-card-id" id="editIdRow">
+        <span id="editIdText">ID: —</span>
+        <button class="admin-id-copy" id="editIdCopyBtn" title="Copiar ID">📋</button>
+      </div>
+
       <div class="admin-status-row">
         <button class="admin-btn-aprobar" onclick="cambiarEstado('aprobado')">✓ Aprobar</button>
         <button class="admin-btn-rechazar" onclick="cambiarEstado('rechazado')">✕ Rechazar</button>
@@ -244,8 +249,18 @@
           <span class="admin-status-badge admin-status-${p.estado || 'pendiente'}">${p.estado || 'pendiente'}</span>
           <h3>${p.nombre}</h3>
           <p>${p.especialidad || ''}</p>
+          <div class="admin-card-id">
+            <span>ID: ${p.id}</span>
+            <button class="admin-id-copy" data-copy-id="${p.id}" title="Copiar ID">📋</button>
+          </div>
           <button class="admin-manage-btn">Gestionar</button>
         </div>`;
+      card.querySelector('.admin-id-copy').addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(p.id);
+        e.target.textContent = '✅';
+        setTimeout(() => { e.target.textContent = '📋'; }, 1200);
+      });
       card.querySelector('.admin-manage-btn').addEventListener('click', () => abrirEdicion(p.id));
       grid.appendChild(card);
     });
@@ -427,6 +442,14 @@
 
     document.getElementById('editEstadoBadge').textContent = p.estado || 'pendiente';
     document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${p.estado || 'pendiente'}`;
+
+    document.getElementById('editIdText').textContent = `ID: ${p.id}`;
+    const idCopyBtn = document.getElementById('editIdCopyBtn');
+    idCopyBtn.onclick = () => {
+      navigator.clipboard.writeText(p.id);
+      idCopyBtn.textContent = '✅';
+      setTimeout(() => { idCopyBtn.textContent = '📋'; }, 1200);
+    };
 
     document.getElementById('editNombre').value       = p.nombre || '';
     document.getElementById('editTelefono').value     = p.telefono || '';

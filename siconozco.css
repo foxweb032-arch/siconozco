@@ -1584,6 +1584,20 @@
 }
 .admin-add-photo-label input { display: none; }
 
+.admin-card-id {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  margin: 4px 0 8px; padding: 4px 8px;
+  background: var(--light-gray); border-radius: 6px;
+}
+.admin-card-id span {
+  font-size: 0.7rem; color: var(--mid-gray); font-family: monospace;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.admin-id-copy {
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  font-size: 0.85rem; padding: 0 2px; line-height: 1;
+}
+
 .admin-resenas-list { margin-bottom: 12px; max-height: 340px; overflow-y: auto; }
 .admin-resena-item {
   border-bottom: 1px solid var(--light-gray);

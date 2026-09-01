@@ -1584,6 +1584,21 @@
 }
 .admin-add-photo-label input { display: none; }
 
+.admin-resenas-list { margin-bottom: 12px; max-height: 340px; overflow-y: auto; }
+.admin-resena-item {
+  border-bottom: 1px solid var(--light-gray);
+  padding: 10px 0;
+}
+.admin-resena-item:last-child { border-bottom: none; }
+.admin-resena-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.admin-resena-info { flex: 1; min-width: 0; }
+.admin-resena-fecha { font-size: 0.72rem; color: var(--mid-gray); display: block; margin-top: 2px; }
+.admin-resena-delete {
+  flex-shrink: 0; background: none; border: 1px solid #f0c0c0; color: #c0392b;
+  border-radius: 8px; padding: 4px 9px; font-size: 0.72rem; font-weight: 600; cursor: pointer;
+}
+.admin-resena-delete:hover { background: #fdf0f0; }
+
 .admin-save-btn {
   width: 100%; background: var(--black); color: var(--white); border: none;
   border-radius: 10px; padding: 12px; font-size: 0.88rem; font-weight: 700; cursor: pointer; margin-top: 6px;
