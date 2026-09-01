@@ -1681,3 +1681,18 @@
 .admin-btn-email-link { background: var(--black); color: #fff; }
 .admin-btn-mark { background: var(--light-gray); color: var(--dark-gray); }
 .admin-btn-mark.activo { background: #D4EDDA; color: #155724; }
+
+/* ── ADMIN: RESERVACIONES — ESTADO COMPLETADO Y NOTAS ── */
+.admin-status-completado { background: #D6E4FF; color: #1B4F9C; }
+.admin-notas-wrap { margin-top: 12px; }
+.admin-notas-wrap label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--dark-gray); margin-bottom: 5px; }
+.admin-notas-wrap textarea {
+  width: 100%; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 8px 10px; font-family: inherit; font-size: 0.8rem; box-sizing: border-box; resize: vertical;
+}
+.admin-btn-guardar-nota {
+  margin-top: 6px; background: var(--black); color: var(--white); border: none;
+  border-radius: 8px; padding: 7px 14px; font-size: 0.76rem; font-weight: 700; cursor: pointer;
+}
+.admin-btn-guardar-nota:hover { background: var(--dark-gray); }
+.admin-nota-guardada { font-size: 0.74rem; color: #155724; margin-top: 5px; display: none; }
