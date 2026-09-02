@@ -219,23 +219,8 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import { comprimirImagen, registrarProveedor } from './firebase.js';
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
-    authDomain: "siconozco-ab496.firebaseapp.com",
-    projectId: "siconozco-ab496",
-    storageBucket: "siconozco-ab496.firebasestorage.app",
-    messagingSenderId: "983709453039",
-    appId: "1:983709453039:web:2b6d18c68b284bcdc7691a"
-  };
-
-  const app     = initializeApp(firebaseConfig);
-  const db      = getFirestore(app);
-  const storage = getStorage(app);
+  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { storage, comprimirImagen, registrarProveedor } from './firebase.js';
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {

@@ -344,7 +344,7 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 }
 
 export {
-  db, auth,
+  db, auth, storage,
   registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
