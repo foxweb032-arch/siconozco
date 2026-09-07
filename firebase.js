@@ -79,11 +79,47 @@ async function registrarProveedor(datos) {
   return { id: nuevoProveedorRef.id, folio };
 }
 
-// ── CIUDADES DISPONIBLES Y SELECCIÓN DEL VISITANTE ──
-// Lista de ciudades donde opera SiConozco. Agrega aquí nuevas ciudades conforme se expanda.
-const CIUDADES_DISPONIBLES = ['Saltillo', 'Morelia'];
+// ── CIUDADES DISPONIBLES (gestionadas desde el admin) Y SELECCIÓN DEL VISITANTE ──
+const CIUDADES_POR_DEFECTO = ['Saltillo', 'Morelia'];
 const CIUDAD_POR_DEFECTO   = 'Saltillo';
 const CIUDAD_STORAGE_KEY   = 'sc_ciudad';
+
+// Lee la lista de ciudades activas desde Firestore (documento único config/ciudades).
+// Si no existe todavía o falla la lectura, regresa una lista de respaldo para que el sitio nunca se quede sin opciones.
+async function cargarCiudades() {
+  try {
+    const ref  = doc(db, 'config', 'ciudades');
+    const snap = await getDoc(ref);
+    if (snap.exists() && Array.isArray(snap.data().lista) && snap.data().lista.length > 0) {
+      return snap.data().lista;
+    }
+    return CIUDADES_POR_DEFECTO;
+  } catch (error) {
+    console.error('Error cargando ciudades:', error);
+    return CIUDADES_POR_DEFECTO;
+  }
+}
+
+// ── AGREGAR CIUDAD (ADMIN) ──
+async function agregarCiudad(ciudad) {
+  const nombre = (ciudad || '').trim();
+  if (!nombre) return;
+  const ref  = doc(db, 'config', 'ciudades');
+  const snap = await getDoc(ref);
+  const actuales = (snap.exists() && Array.isArray(snap.data().lista)) ? snap.data().lista : CIUDADES_POR_DEFECTO;
+  if (actuales.some(c => c.toLowerCase() === nombre.toLowerCase())) return;
+  await setDoc(ref, { lista: [...actuales, nombre] });
+}
+
+// ── ELIMINAR CIUDAD (ADMIN) ──
+async function eliminarCiudad(ciudad) {
+  const ref  = doc(db, 'config', 'ciudades');
+  const snap = await getDoc(ref);
+  const actuales = (snap.exists() && Array.isArray(snap.data().lista)) ? snap.data().lista : CIUDADES_POR_DEFECTO;
+  const nuevas = actuales.filter(c => c !== ciudad);
+  if (nuevas.length === 0) throw new Error('Debe quedar al menos una ciudad disponible.');
+  await setDoc(ref, { lista: nuevas });
+}
 
 function obtenerCiudadActual() {
   try {
@@ -367,7 +403,7 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 
 export {
   db, auth, storage,
-  CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual,
+  cargarCiudades, agregarCiudad, eliminarCiudad, obtenerCiudadActual, guardarCiudadActual,
   registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,

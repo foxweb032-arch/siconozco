@@ -226,12 +226,15 @@
 
 <script type="module">
   import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import { storage, comprimirImagen, registrarProveedor, CIUDADES_DISPONIBLES } from './firebase.js';
+  import { storage, comprimirImagen, registrarProveedor, cargarCiudades } from './firebase.js';
 
   // ── CIUDAD ─────────────────────────────
   const selectCiudad = document.getElementById('aCiudad');
-  selectCiudad.innerHTML = '<option value="" disabled selected>Selecciona tu ciudad</option>'
-    + CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
+  selectCiudad.innerHTML = '<option value="" disabled selected>Cargando ciudades…</option>';
+  cargarCiudades().then(ciudades => {
+    selectCiudad.innerHTML = '<option value="" disabled selected>Selecciona tu ciudad</option>'
+      + ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+  });
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {

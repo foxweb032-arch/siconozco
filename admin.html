@@ -46,6 +46,15 @@
       </select>
     </div>
 
+    <div class="admin-ciudades-panel">
+      <p class="admin-ciudades-titulo">Ciudades activas</p>
+      <div class="admin-ciudades-chips" id="ciudadesChips"></div>
+      <div class="admin-ciudad-add">
+        <input type="text" id="nuevaCiudadInput" placeholder="Nombre de la ciudad nueva">
+        <button onclick="agregarCiudadClick()">+ Agregar ciudad</button>
+      </div>
+    </div>
+
     <div class="admin-grid" id="adminGrid">
       <p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">Cargando proveedores…</p>
     </div>
@@ -175,7 +184,7 @@
     cargarResenas, eliminarResena,
     asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarHorarios, guardarHorario,
-    CIUDADES_DISPONIBLES,
+    cargarCiudades, agregarCiudad, eliminarCiudad,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
     cargarMensajes, marcarMensajeRespondido,
     escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
@@ -269,14 +278,58 @@
     vidriero: '🪟', jardinero: '🍃'
   };
 
-  function poblarSelectsCiudad() {
-    const opciones = CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
+  async function poblarSelectsCiudad() {
+    const ciudades = await cargarCiudades();
+
+    const opciones = ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
     document.getElementById('editCiudad').innerHTML = opciones;
 
     const filtroSelect = document.getElementById('filtroCiudadSelect');
+    const filtroActualValor = filtroSelect.value || 'todas';
     filtroSelect.innerHTML = '<option value="todas">Todas las ciudades</option>' + opciones;
+    filtroSelect.value = ciudades.includes(filtroActualValor) ? filtroActualValor : 'todas';
+    filtroCiudadActual = filtroSelect.value;
+
+    const chips = document.getElementById('ciudadesChips');
+    chips.innerHTML = ciudades.map(c => `
+      <span class="admin-ciudad-chip">${c}
+        <button class="admin-ciudad-chip-x" data-ciudad="${c}" title="Eliminar ${c}">✕</button>
+      </span>
+    `).join('');
+    chips.querySelectorAll('.admin-ciudad-chip-x').forEach(btn => {
+      btn.addEventListener('click', () => quitarCiudadClick(btn.dataset.ciudad));
+    });
+
+    if (document.getElementById('adminGrid')) {
+      renderGrid();
+    }
   }
   poblarSelectsCiudad();
+
+  async function agregarCiudadClick() {
+    const input  = document.getElementById('nuevaCiudadInput');
+    const nombre = input.value.trim();
+    if (!nombre) return;
+    try {
+      await agregarCiudad(nombre);
+      input.value = '';
+      await poblarSelectsCiudad();
+    } catch (error) {
+      console.error('Error al agregar ciudad:', error);
+      alert('Hubo un error al agregar la ciudad.');
+    }
+  }
+  window.agregarCiudadClick = agregarCiudadClick;
+
+  async function quitarCiudadClick(ciudad) {
+    if (!confirm(`¿Quitar "${ciudad}" de la lista de ciudades activas?\n\nLos proveedores ya registrados en esa ciudad no se borran ni se mueven, solo dejará de aparecer como opción para nuevos visitantes y proveedores.`)) return;
+    try {
+      await eliminarCiudad(ciudad);
+      await poblarSelectsCiudad();
+    } catch (error) {
+      alert(error.message || 'Hubo un error al eliminar la ciudad.');
+    }
+  }
 
   function cambiarFiltroCiudad(ciudad) {
     filtroCiudadActual = ciudad;

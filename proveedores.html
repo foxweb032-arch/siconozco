@@ -261,7 +261,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion, CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual } from './firebase.js';
+  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion, cargarCiudades, obtenerCiudadActual, guardarCiudadActual } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
 
@@ -360,10 +360,14 @@
     document.getElementById('provHeaderCiudad').textContent     = ciudad;
   }
 
-  function abrirModalCiudad() {
+  async function abrirModalCiudad() {
     const lista = document.getElementById('ciudadModalLista');
+    lista.innerHTML = '<p class="perfil-empty-reviews">Cargando ciudades…</p>';
+    document.getElementById('ciudadModalOverlay').classList.add('activo');
+
+    const ciudades = await cargarCiudades();
     const actual = obtenerCiudadActual();
-    lista.innerHTML = CIUDADES_DISPONIBLES.map(c => `
+    lista.innerHTML = ciudades.map(c => `
       <button class="ciudad-modal-opcion ${c === actual ? 'seleccionada' : ''}" data-ciudad="${c}">
         📍 ${c} ${c === actual ? '✓' : ''}
       </button>
@@ -371,7 +375,6 @@
     lista.querySelectorAll('.ciudad-modal-opcion').forEach(btn => {
       btn.addEventListener('click', () => seleccionarCiudad(btn.dataset.ciudad));
     });
-    document.getElementById('ciudadModalOverlay').classList.add('activo');
   }
 
   function cerrarModalCiudad() {
