@@ -100,6 +100,12 @@
       </div>
 
       <div class="afil-group">
+        <label for="aCiudad">Ciudad <span>*</span></label>
+        <select id="aCiudad"></select>
+        <span class="afil-error-msg" id="errCiudad">Selecciona tu ciudad</span>
+      </div>
+
+      <div class="afil-group">
         <label for="aUbicacion">Dirección <span>*</span></label>
         <input type="text" id="aUbicacion" placeholder="Ej. Col. Centro, Saltillo">
         <span class="afil-error-msg" id="errUbicacion">Ingresa tu dirección</span>
@@ -220,7 +226,12 @@
 
 <script type="module">
   import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import { storage, comprimirImagen, registrarProveedor } from './firebase.js';
+  import { storage, comprimirImagen, registrarProveedor, CIUDADES_DISPONIBLES } from './firebase.js';
+
+  // ── CIUDAD ─────────────────────────────
+  const selectCiudad = document.getElementById('aCiudad');
+  selectCiudad.innerHTML = '<option value="" disabled selected>Selecciona tu ciudad</option>'
+    + CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
@@ -322,6 +333,7 @@
     const experiencia  = document.getElementById('aExperiencia').value.trim();
     const profesion    = document.getElementById('aProfesion').value;
     const especialidad = document.getElementById('aEspecialidad').value.trim();
+    const ciudad       = document.getElementById('aCiudad').value;
     const ubicacion    = document.getElementById('aUbicacion').value.trim();
     const descripcion  = document.getElementById('aDescripcion').value.trim();
     const acepta       = document.getElementById('aceptaTerminos').checked;
@@ -334,6 +346,7 @@
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
+    valido = validar('aCiudad',       'errCiudad',       ciudad !== '')               && valido;
     valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
     valido = validar('aDescripcion',  'errDescripcion',  descripcion.length > 10)    && valido;
 
@@ -370,6 +383,7 @@
         experiencia,
         categoria:   profesion,
         especialidad,
+        ciudad,
         ubicacion,
         descripcion,
         fotos:       urlsFotos

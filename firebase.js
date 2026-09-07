@@ -79,6 +79,28 @@ async function registrarProveedor(datos) {
   return { id: nuevoProveedorRef.id, folio };
 }
 
+// ── CIUDADES DISPONIBLES Y SELECCIÓN DEL VISITANTE ──
+// Lista de ciudades donde opera SiConozco. Agrega aquí nuevas ciudades conforme se expanda.
+const CIUDADES_DISPONIBLES = ['Saltillo', 'Morelia'];
+const CIUDAD_POR_DEFECTO   = 'Saltillo';
+const CIUDAD_STORAGE_KEY   = 'sc_ciudad';
+
+function obtenerCiudadActual() {
+  try {
+    return localStorage.getItem(CIUDAD_STORAGE_KEY) || CIUDAD_POR_DEFECTO;
+  } catch (error) {
+    return CIUDAD_POR_DEFECTO;
+  }
+}
+
+function guardarCiudadActual(ciudad) {
+  try {
+    localStorage.setItem(CIUDAD_STORAGE_KEY, ciudad);
+  } catch (error) {
+    console.warn('No se pudo guardar la ciudad seleccionada:', error);
+  }
+}
+
 // ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
   try {
@@ -345,6 +367,7 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 
 export {
   db, auth, storage,
+  CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual,
   registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,

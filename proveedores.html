@@ -17,7 +17,9 @@
   <ul class="nav-links">
     <li><a href="index.html">Inicio</a></li>
     <li><a href="proveedores.html">Proveedores</a></li>
+    <li><a href="#">Categorías</a></li>
     <li><a href="afiliation.html">Publicar servicio</a></li>
+    <li><button class="btn-ciudad" id="btnCiudadNav" onclick="abrirModalCiudad()">📍 <span id="ciudadNavTexto">Saltillo</span></button></li>
     <li><a href="contacto.html" class="btn-contact">Contacto</a></li>
   </ul>
   <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">
@@ -29,12 +31,23 @@
   <button class="close-btn" onclick="toggleMenu()">✕</button>
   <a href="index.html" onclick="toggleMenu()">Inicio</a>
   <a href="proveedores.html" onclick="toggleMenu()">Proveedores</a>
+  <a href="#" onclick="toggleMenu()">Categorías</a>
   <a href="afiliacion.html" onclick="toggleMenu()">Publicar servicio</a>
+  <button class="btn-ciudad btn-ciudad-mobile" onclick="abrirModalCiudad()">📍 <span id="ciudadNavTextoMobile">Saltillo</span></button>
   <a href="contacto.html" onclick="toggleMenu()">Contacto</a>
 </div>
 
+<!-- MODAL SELECCIÓN DE CIUDAD -->
+<div class="ciudad-modal-overlay" id="ciudadModalOverlay" onclick="cerrarModalCiudadSiFondo(event)">
+  <div class="ciudad-modal-box">
+    <h3>¿En qué ciudad estás?</h3>
+    <p>Te mostraremos los proveedores disponibles en tu ciudad.</p>
+    <div class="ciudad-modal-lista" id="ciudadModalLista"></div>
+  </div>
+</div>
+
 <div class="prov-header">
-  <h1>Encuentra Profesionales en Saltillo</h1>
+  <h1>Encuentra Profesionales en <span id="provHeaderCiudad">Saltillo</span></h1>
   <p>Contacta y contrata carpinteros, herreros, albañiles y más</p>
   <div class="prov-search">
     <span>🔍</span>
@@ -248,7 +261,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion } from './firebase.js';
+  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion, CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
 
@@ -275,14 +288,16 @@
   };
 
   async function renderProveedores() {
-    const proveedores = await cargarProveedores();
+    const ciudadActual = obtenerCiudadActual();
+    const todos = await cargarProveedores();
+    const proveedores = todos.filter(p => (p.ciudad || 'Saltillo') === ciudadActual);
     proveedores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     proveedoresCache = proveedores;
     const grid        = document.getElementById('provGrid');
     document.getElementById('provLoading').remove();
 
     if (proveedores.length === 0) {
-      grid.innerHTML = '<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>No hay proveedores disponibles por el momento.</div>';
+      grid.innerHTML = `<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>Todavía no hay proveedores disponibles en ${ciudadActual}.</div>`;
       return;
     }
 
@@ -336,6 +351,46 @@
   }
 
   renderProveedores();
+
+  // ── SELECTOR DE CIUDAD ─────────────────
+  function actualizarTextoCiudadNav() {
+    const ciudad = obtenerCiudadActual();
+    document.getElementById('ciudadNavTexto').textContent       = ciudad;
+    document.getElementById('ciudadNavTextoMobile').textContent = ciudad;
+    document.getElementById('provHeaderCiudad').textContent     = ciudad;
+  }
+
+  function abrirModalCiudad() {
+    const lista = document.getElementById('ciudadModalLista');
+    const actual = obtenerCiudadActual();
+    lista.innerHTML = CIUDADES_DISPONIBLES.map(c => `
+      <button class="ciudad-modal-opcion ${c === actual ? 'seleccionada' : ''}" data-ciudad="${c}">
+        📍 ${c} ${c === actual ? '✓' : ''}
+      </button>
+    `).join('');
+    lista.querySelectorAll('.ciudad-modal-opcion').forEach(btn => {
+      btn.addEventListener('click', () => seleccionarCiudad(btn.dataset.ciudad));
+    });
+    document.getElementById('ciudadModalOverlay').classList.add('activo');
+  }
+
+  function cerrarModalCiudad() {
+    document.getElementById('ciudadModalOverlay').classList.remove('activo');
+  }
+
+  function cerrarModalCiudadSiFondo(e) {
+    if (e.target.id === 'ciudadModalOverlay') cerrarModalCiudad();
+  }
+
+  function seleccionarCiudad(ciudad) {
+    guardarCiudadActual(ciudad);
+    cerrarModalCiudad();
+    location.reload();
+  }
+
+  actualizarTextoCiudadNav();
+  window.abrirModalCiudad          = abrirModalCiudad;
+  window.cerrarModalCiudadSiFondo  = cerrarModalCiudadSiFondo;
 
   // ── PERFIL DE PROVEEDOR ───────────────
   // ── GALERÍA DEL PERFIL ────────────────

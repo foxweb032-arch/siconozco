@@ -41,6 +41,9 @@
       <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
       <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
       <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
+      <select class="admin-ciudad-filtro" id="filtroCiudadSelect" onchange="cambiarFiltroCiudad(this.value)">
+        <option value="todas">Todas las ciudades</option>
+      </select>
     </div>
 
     <div class="admin-grid" id="adminGrid">
@@ -140,6 +143,10 @@
         <input type="text" id="editEspecialidad">
       </div>
       <div class="admin-field">
+        <label>Ciudad</label>
+        <select id="editCiudad"></select>
+      </div>
+      <div class="admin-field">
         <label>Ubicación</label>
         <input type="text" id="editUbicacion">
       </div>
@@ -168,6 +175,7 @@
     cargarResenas, eliminarResena,
     asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarHorarios, guardarHorario,
+    CIUDADES_DISPONIBLES,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
     cargarMensajes, marcarMensajeRespondido,
     escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
@@ -175,6 +183,7 @@
 
   let proveedoresCache = [];
   let filtroActual      = 'todos';
+  let filtroCiudadActual = 'todas';
   let proveedorEnEdicion = null; // objeto completo del proveedor abierto
   let reservacionesCache = [];
   let mensajesCache      = [];
@@ -260,11 +269,30 @@
     vidriero: '🪟', jardinero: '🍃'
   };
 
+  function poblarSelectsCiudad() {
+    const opciones = CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
+    document.getElementById('editCiudad').innerHTML = opciones;
+
+    const filtroSelect = document.getElementById('filtroCiudadSelect');
+    filtroSelect.innerHTML = '<option value="todas">Todas las ciudades</option>' + opciones;
+  }
+  poblarSelectsCiudad();
+
+  function cambiarFiltroCiudad(ciudad) {
+    filtroCiudadActual = ciudad;
+    renderGrid();
+  }
+  window.cambiarFiltroCiudad = cambiarFiltroCiudad;
+
   function renderGrid() {
     const grid = document.getElementById('adminGrid');
-    const lista = filtroActual === 'todos'
+    let lista = filtroActual === 'todos'
       ? proveedoresCache
       : proveedoresCache.filter(p => p.estado === filtroActual);
+
+    if (filtroCiudadActual !== 'todas') {
+      lista = lista.filter(p => (p.ciudad || 'Saltillo') === filtroCiudadActual);
+    }
 
     if (lista.length === 0) {
       grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">No hay proveedores en esta categoría.</p>';
@@ -287,6 +315,7 @@
           <span class="admin-status-badge admin-status-${p.estado || 'pendiente'}">${p.estado || 'pendiente'}</span>
           <h3>${p.nombre}</h3>
           <p>${p.especialidad || ''}</p>
+          <p class="admin-card-ciudad">📍 ${p.ciudad || 'Saltillo'}</p>
           ${p.folio ? `<p class="admin-card-folio">Folio: <strong>${p.folio}</strong></p>` : ''}
           <div class="admin-card-id">
             <span>ID: ${p.id}</span>
@@ -496,6 +525,7 @@
     document.getElementById('editEmail').value        = p.email || '';
     document.getElementById('editCategoria').value    = p.categoria || 'electricista';
     document.getElementById('editEspecialidad').value = p.especialidad || '';
+    document.getElementById('editCiudad').value        = p.ciudad || 'Saltillo';
     document.getElementById('editUbicacion').value    = p.ubicacion || '';
     document.getElementById('editExperiencia').value  = p.experiencia || '';
     document.getElementById('editDescripcion').value  = p.descripcion || '';
@@ -772,6 +802,7 @@
       email:        document.getElementById('editEmail').value.trim(),
       categoria:    document.getElementById('editCategoria').value,
       especialidad: document.getElementById('editEspecialidad').value.trim(),
+      ciudad:       document.getElementById('editCiudad').value,
       ubicacion:    document.getElementById('editUbicacion').value.trim(),
       experiencia:  document.getElementById('editExperiencia').value.trim(),
       descripcion:  document.getElementById('editDescripcion').value.trim()
