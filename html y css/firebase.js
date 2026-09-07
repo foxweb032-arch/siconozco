@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, runTransaction, updateDoc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -17,6 +17,89 @@ const app     = initializeApp(firebaseConfig);
 const db      = getFirestore(app);
 const storage = getStorage(app);
 const auth    = getAuth(app);
+
+// ── COMPRIMIR IMAGEN ANTES DE SUBIR ───
+// Redimensiona a un ancho máximo y reexporta como JPEG para reducir el tamaño del archivo.
+function comprimirImagen(archivo, maxAncho = 1600, calidad = 0.8) {
+  return new Promise((resolve) => {
+    if (!archivo.type || !archivo.type.startsWith('image/')) {
+      resolve(archivo);
+      return;
+    }
+    const img = new Image();
+    const url = URL.createObjectURL(archivo);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxAncho) {
+        height = Math.round(height * (maxAncho / width));
+        width  = maxAncho;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (!blob) { resolve(archivo); return; }
+        const nombreJpg = archivo.name.replace(/\.[^.]+$/, '') + '.jpg';
+        resolve(new File([blob], nombreJpg, { type: 'image/jpeg', lastModified: Date.now() }));
+      }, 'image/jpeg', calidad);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(archivo); };
+    img.src = url;
+  });
+}
+
+// ── REGISTRAR PROVEEDOR CON FOLIO SECUENCIAL ──
+// Genera un folio corto (SC-0001, SC-0002...) usando un contador atómico,
+// y crea el documento del proveedor con ese folio incluido.
+async function registrarProveedor(datos) {
+  const contadorRef       = doc(db, 'contadores', 'proveedores');
+  const nuevoProveedorRef = doc(collection(db, 'proveedores'));
+
+  const folio = await runTransaction(db, async (transaction) => {
+    const contadorSnap = await transaction.get(contadorRef);
+    const actual        = contadorSnap.exists() ? (contadorSnap.data().siguiente || 0) : 0;
+    const siguiente      = actual + 1;
+    const folioGenerado  = `SC-${String(siguiente).padStart(4, '0')}`;
+
+    transaction.set(contadorRef, { siguiente });
+    transaction.set(nuevoProveedorRef, {
+      ...datos,
+      folio: folioGenerado,
+      estado: 'pendiente',
+      fechaRegistro: new Date().toISOString()
+    });
+
+    return folioGenerado;
+  });
+
+  return { id: nuevoProveedorRef.id, folio };
+}
+
+// ── CIUDADES DISPONIBLES Y SELECCIÓN DEL VISITANTE ──
+// Lista de ciudades donde opera SiConozco. Agrega aquí nuevas ciudades conforme se expanda.
+const CIUDADES_DISPONIBLES = ['Saltillo', 'Morelia'];
+const CIUDAD_POR_DEFECTO   = 'Saltillo';
+const CIUDAD_STORAGE_KEY   = 'sc_ciudad';
+
+function obtenerCiudadActual() {
+  try {
+    return localStorage.getItem(CIUDAD_STORAGE_KEY) || CIUDAD_POR_DEFECTO;
+  } catch (error) {
+    return CIUDAD_POR_DEFECTO;
+  }
+}
+
+function guardarCiudadActual(ciudad) {
+  try {
+    localStorage.setItem(CIUDAD_STORAGE_KEY, ciudad);
+  } catch (error) {
+    console.warn('No se pudo guardar la ciudad seleccionada:', error);
+  }
+}
 
 // ── CARGAR HORARIOS ───────────────────
 async function cargarHorarios(proveedorId) {
@@ -155,9 +238,10 @@ async function eliminarProveedor(proveedorId) {
 
 // ── SUBIR FOTO DESDE EL PANEL (ADMIN) ──
 async function subirFotoAdmin(archivo) {
-  const nombreUnico = `${Date.now()}-${archivo.name}`;
+  const comprimido  = await comprimirImagen(archivo);
+  const nombreUnico = `${Date.now()}-${comprimido.name}`;
   const storageRef  = ref(storage, `proveedores/${nombreUnico}`);
-  await uploadBytes(storageRef, archivo);
+  await uploadBytes(storageRef, comprimido);
   return getDownloadURL(storageRef);
 }
 
@@ -169,6 +253,62 @@ async function eliminarFotoStorage(url) {
   } catch (error) {
     console.warn('No se pudo eliminar la foto de Storage (puede que ya no exista):', error);
   }
+}
+
+const DIAS_SEMANA = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'];
+
+// ── ASEGURAR HORARIO VACÍO AL APROBAR (ADMIN) ──
+// Crea el documento de horarios con el mismo ID del proveedor SOLO si no existe todavía,
+// para no pisar horarios que el dueño ya haya cargado a mano.
+async function asegurarHorarioProveedor(proveedorId) {
+  const horarioRef = doc(db, 'horarios', proveedorId);
+  const snap = await getDoc(horarioRef);
+  if (snap.exists()) return;
+
+  const vacio = {};
+  DIAS_SEMANA.forEach(d => { vacio[d] = []; });
+  await setDoc(horarioRef, vacio);
+}
+
+// ── ELIMINAR HORARIO AL ELIMINAR PROVEEDOR (ADMIN) ──
+async function eliminarHorarioProveedor(proveedorId) {
+  try {
+    await deleteDoc(doc(db, 'horarios', proveedorId));
+  } catch (error) {
+    console.warn('No se pudo eliminar el horario (puede que no existiera):', error);
+  }
+}
+
+// ── GUARDAR HORARIO DE UN PROVEEDOR (ADMIN) ──
+async function guardarHorario(proveedorId, datosHorario) {
+  const horarioRef = doc(db, 'horarios', proveedorId);
+  await setDoc(horarioRef, datosHorario);
+}
+
+// ── ESCUCHAR CONTADORES EN TIEMPO REAL (ADMIN) ──
+// Cada función devuelve un "unsubscribe" que hay que llamar al cerrar sesión.
+function escucharPendientesProveedores(callback) {
+  const q = query(collection(db, 'proveedores'), where('estado', '==', 'pendiente'));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando proveedores pendientes:', error)
+  );
+}
+
+function escucharPendientesReservaciones(callback) {
+  const q = query(collection(db, 'reservaciones'), where('estado', '==', 'pendiente'));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando reservaciones pendientes:', error)
+  );
+}
+
+function escucharPendientesMensajes(callback) {
+  const q = query(collection(db, 'mensajes'), where('respondido', '==', false));
+  return onSnapshot(q,
+    (snapshot) => callback(snapshot.size),
+    (error) => console.error('Error escuchando mensajes pendientes:', error)
+  );
 }
 
 // ── RESERVACIONES ──────────────────────
@@ -226,12 +366,16 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 }
 
 export {
-  db, auth,
+  db, auth, storage,
+  CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual,
+  registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
   cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
-  subirFotoAdmin, eliminarFotoStorage,
+  subirFotoAdmin, eliminarFotoStorage, comprimirImagen,
+  asegurarHorarioProveedor, eliminarHorarioProveedor, guardarHorario,
   guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
-  guardarMensaje, cargarMensajes, marcarMensajeRespondido
+  guardarMensaje, cargarMensajes, marcarMensajeRespondido,
+  escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
 };
 

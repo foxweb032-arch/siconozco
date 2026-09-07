@@ -100,6 +100,12 @@
       </div>
 
       <div class="afil-group">
+        <label for="aCiudad">Ciudad <span>*</span></label>
+        <select id="aCiudad"></select>
+        <span class="afil-error-msg" id="errCiudad">Selecciona tu ciudad</span>
+      </div>
+
+      <div class="afil-group">
         <label for="aUbicacion">Dirección <span>*</span></label>
         <input type="text" id="aUbicacion" placeholder="Ej. Col. Centro, Saltillo">
         <span class="afil-error-msg" id="errUbicacion">Ingresa tu dirección</span>
@@ -175,6 +181,7 @@
       <span>🎉</span>
       <h2>¡Solicitud recibida!</h2>
       <p>Gracias por registrarte. Revisaremos tu información y nos pondremos en contacto contigo en un plazo de 24 a 48 horas para confirmar tu afiliación.</p>
+      <p class="afil-folio-box">Tu número de folio es <strong id="afilFolioTexto">—</strong><br>Guárdalo por si necesitas hacer alguna aclaración con nosotros.</p>
     </div>
   </div>
 </div>
@@ -218,22 +225,13 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+  import { storage, comprimirImagen, registrarProveedor, CIUDADES_DISPONIBLES } from './firebase.js';
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBV4KZ_K4qsjFC-GMsdhJ0jpFbYZMMXlII",
-    authDomain: "siconozco-ab496.firebaseapp.com",
-    projectId: "siconozco-ab496",
-    storageBucket: "siconozco-ab496.firebasestorage.app",
-    messagingSenderId: "983709453039",
-    appId: "1:983709453039:web:2b6d18c68b284bcdc7691a"
-  };
-
-  const app     = initializeApp(firebaseConfig);
-  const db      = getFirestore(app);
-  const storage = getStorage(app);
+  // ── CIUDAD ─────────────────────────────
+  const selectCiudad = document.getElementById('aCiudad');
+  selectCiudad.innerHTML = '<option value="" disabled selected>Selecciona tu ciudad</option>'
+    + CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
@@ -316,7 +314,8 @@
     const indices = Object.keys(fotosSubidas).sort((a, b) => a - b);
     const urls = [];
     for (const index of indices) {
-      const archivo = fotosSubidas[index];
+      const archivoOriginal = fotosSubidas[index];
+      const archivo = await comprimirImagen(archivoOriginal);
       const nombreUnico = `${Date.now()}-${index}-${archivo.name}`;
       const storageRef = ref(storage, `proveedores/${nombreUnico}`);
       await uploadBytes(storageRef, archivo);
@@ -334,6 +333,7 @@
     const experiencia  = document.getElementById('aExperiencia').value.trim();
     const profesion    = document.getElementById('aProfesion').value;
     const especialidad = document.getElementById('aEspecialidad').value.trim();
+    const ciudad       = document.getElementById('aCiudad').value;
     const ubicacion    = document.getElementById('aUbicacion').value.trim();
     const descripcion  = document.getElementById('aDescripcion').value.trim();
     const acepta       = document.getElementById('aceptaTerminos').checked;
@@ -346,6 +346,7 @@
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
+    valido = validar('aCiudad',       'errCiudad',       ciudad !== '')               && valido;
     valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
     valido = validar('aDescripcion',  'errDescripcion',  descripcion.length > 10)    && valido;
 
@@ -374,21 +375,21 @@
 
       btn.textContent = 'Enviando...';
 
-      // 2. Guardar en Firestore con estado "pendiente"
-      await addDoc(collection(db, 'proveedores'), {
+      // 2. Guardar en Firestore con estado "pendiente" y generar folio corto
+      const { folio } = await registrarProveedor({
         nombre,
         telefono:    tel,
         email,
         experiencia,
         categoria:   profesion,
         especialidad,
+        ciudad,
         ubicacion,
         descripcion,
-        fotos:       urlsFotos,
-        estado:      'pendiente',
-        fechaRegistro: new Date().toISOString()
+        fotos:       urlsFotos
       });
 
+      document.getElementById('afilFolioTexto').textContent = folio;
       document.getElementById('formContent').style.display = 'none';
       document.getElementById('afilOk').style.display      = 'block';
 

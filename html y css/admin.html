@@ -30,9 +30,9 @@
   </div>
 
   <div class="admin-main-tabs">
-    <button class="admin-main-tab activa" data-seccion="proveedores" onclick="cambiarSeccion('proveedores')">Proveedores</button>
-    <button class="admin-main-tab" data-seccion="reservaciones" onclick="cambiarSeccion('reservaciones')">Reservaciones</button>
-    <button class="admin-main-tab" data-seccion="mensajes" onclick="cambiarSeccion('mensajes')">Mensajes de contacto</button>
+    <button class="admin-main-tab activa" data-seccion="proveedores" onclick="cambiarSeccion('proveedores')">Proveedores <span class="admin-tab-badge" id="badgeProveedores"></span></button>
+    <button class="admin-main-tab" data-seccion="reservaciones" onclick="cambiarSeccion('reservaciones')">Reservaciones <span class="admin-tab-badge" id="badgeReservaciones"></span></button>
+    <button class="admin-main-tab" data-seccion="mensajes" onclick="cambiarSeccion('mensajes')">Mensajes de contacto <span class="admin-tab-badge" id="badgeMensajes"></span></button>
   </div>
 
   <div id="seccionProveedores">
@@ -41,6 +41,9 @@
       <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
       <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
       <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
+      <select class="admin-ciudad-filtro" id="filtroCiudadSelect" onchange="cambiarFiltroCiudad(this.value)">
+        <option value="todas">Todas las ciudades</option>
+      </select>
     </div>
 
     <div class="admin-grid" id="adminGrid">
@@ -79,6 +82,8 @@
 
       <span class="admin-status-badge" id="editEstadoBadge"></span>
 
+      <p class="admin-folio-text" id="editFolioText"></p>
+
       <div class="admin-card-id" id="editIdRow">
         <span id="editIdText">ID: —</span>
         <button class="admin-id-copy" id="editIdCopyBtn" title="Copiar ID">📋</button>
@@ -88,6 +93,11 @@
         <button class="admin-btn-aprobar" onclick="cambiarEstado('aprobado')">✓ Aprobar</button>
         <button class="admin-btn-rechazar" onclick="cambiarEstado('rechazado')">✕ Rechazar</button>
         <button class="admin-btn-pendiente" onclick="cambiarEstado('pendiente')">⏳ Pendiente</button>
+      </div>
+
+      <p class="perfil-reviews-title">Horarios</p>
+      <div class="admin-horarios-box" id="editHorariosBox">
+        <p class="perfil-empty-reviews">Aprueba al proveedor para gestionar sus horarios.</p>
       </div>
 
       <p class="perfil-reviews-title">Fotos</p>
@@ -133,6 +143,10 @@
         <input type="text" id="editEspecialidad">
       </div>
       <div class="admin-field">
+        <label>Ciudad</label>
+        <select id="editCiudad"></select>
+      </div>
+      <div class="admin-field">
         <label>Ubicación</label>
         <input type="text" id="editUbicacion">
       </div>
@@ -159,17 +173,25 @@
     cargarTodosLosProveedores, actualizarProveedor, eliminarProveedor,
     subirFotoAdmin, eliminarFotoStorage,
     cargarResenas, eliminarResena,
+    asegurarHorarioProveedor, eliminarHorarioProveedor,
+    cargarHorarios, guardarHorario,
+    CIUDADES_DISPONIBLES,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
-    cargarMensajes, marcarMensajeRespondido
+    cargarMensajes, marcarMensajeRespondido,
+    escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
   } from './firebase.js';
 
   let proveedoresCache = [];
   let filtroActual      = 'todos';
+  let filtroCiudadActual = 'todas';
   let proveedorEnEdicion = null; // objeto completo del proveedor abierto
   let reservacionesCache = [];
   let mensajesCache      = [];
   let seccionActual      = 'proveedores';
   let reservaFiltro      = 'todas';
+  let unsubProveedores   = null;
+  let unsubReservaciones = null;
+  let unsubMensajes      = null;
 
   // ── LOGIN / LOGOUT ─────────────────────
   onAuthChange((user) => {
@@ -177,11 +199,36 @@
       document.getElementById('loginWrap').style.display = 'none';
       document.getElementById('dashboardWrap').style.display = 'block';
       cargarYRenderizar();
+      iniciarListenersNotificaciones();
     } else {
       document.getElementById('loginWrap').style.display = 'flex';
       document.getElementById('dashboardWrap').style.display = 'none';
+      detenerListenersNotificaciones();
     }
   });
+
+  function iniciarListenersNotificaciones() {
+    detenerListenersNotificaciones();
+    unsubProveedores   = escucharPendientesProveedores(n => actualizarBadge('badgeProveedores', n));
+    unsubReservaciones = escucharPendientesReservaciones(n => actualizarBadge('badgeReservaciones', n));
+    unsubMensajes       = escucharPendientesMensajes(n => actualizarBadge('badgeMensajes', n));
+  }
+
+  function detenerListenersNotificaciones() {
+    if (unsubProveedores)   { unsubProveedores(); unsubProveedores = null; }
+    if (unsubReservaciones) { unsubReservaciones(); unsubReservaciones = null; }
+    if (unsubMensajes)      { unsubMensajes(); unsubMensajes = null; }
+  }
+
+  function actualizarBadge(id, n) {
+    const el = document.getElementById(id);
+    if (n > 0) {
+      el.textContent   = n > 99 ? '99+' : n;
+      el.style.display = 'inline-flex';
+    } else {
+      el.style.display = 'none';
+    }
+  }
 
   async function hacerLogin() {
     const email    = document.getElementById('loginEmail').value.trim();
@@ -222,11 +269,30 @@
     vidriero: '🪟', jardinero: '🍃'
   };
 
+  function poblarSelectsCiudad() {
+    const opciones = CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
+    document.getElementById('editCiudad').innerHTML = opciones;
+
+    const filtroSelect = document.getElementById('filtroCiudadSelect');
+    filtroSelect.innerHTML = '<option value="todas">Todas las ciudades</option>' + opciones;
+  }
+  poblarSelectsCiudad();
+
+  function cambiarFiltroCiudad(ciudad) {
+    filtroCiudadActual = ciudad;
+    renderGrid();
+  }
+  window.cambiarFiltroCiudad = cambiarFiltroCiudad;
+
   function renderGrid() {
     const grid = document.getElementById('adminGrid');
-    const lista = filtroActual === 'todos'
+    let lista = filtroActual === 'todos'
       ? proveedoresCache
       : proveedoresCache.filter(p => p.estado === filtroActual);
+
+    if (filtroCiudadActual !== 'todas') {
+      lista = lista.filter(p => (p.ciudad || 'Saltillo') === filtroCiudadActual);
+    }
 
     if (lista.length === 0) {
       grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:var(--mid-gray); padding:30px;">No hay proveedores en esta categoría.</p>';
@@ -249,6 +315,8 @@
           <span class="admin-status-badge admin-status-${p.estado || 'pendiente'}">${p.estado || 'pendiente'}</span>
           <h3>${p.nombre}</h3>
           <p>${p.especialidad || ''}</p>
+          <p class="admin-card-ciudad">📍 ${p.ciudad || 'Saltillo'}</p>
+          ${p.folio ? `<p class="admin-card-folio">Folio: <strong>${p.folio}</strong></p>` : ''}
           <div class="admin-card-id">
             <span>ID: ${p.id}</span>
             <button class="admin-id-copy" data-copy-id="${p.id}" title="Copiar ID">📋</button>
@@ -444,6 +512,7 @@
     document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${p.estado || 'pendiente'}`;
 
     document.getElementById('editIdText').textContent = `ID: ${p.id}`;
+    document.getElementById('editFolioText').textContent = p.folio ? `Folio: ${p.folio}` : 'Folio: — (registrado antes de esta función)';
     const idCopyBtn = document.getElementById('editIdCopyBtn');
     idCopyBtn.onclick = () => {
       navigator.clipboard.writeText(p.id);
@@ -456,6 +525,7 @@
     document.getElementById('editEmail').value        = p.email || '';
     document.getElementById('editCategoria').value    = p.categoria || 'electricista';
     document.getElementById('editEspecialidad').value = p.especialidad || '';
+    document.getElementById('editCiudad').value        = p.ciudad || 'Saltillo';
     document.getElementById('editUbicacion').value    = p.ubicacion || '';
     document.getElementById('editExperiencia').value  = p.experiencia || '';
     document.getElementById('editDescripcion').value  = p.descripcion || '';
@@ -463,6 +533,7 @@
     document.getElementById('saveMsg').style.display = 'none';
     renderFotosEdicion();
     cargarYRenderResenasEdicion(p.id);
+    cargarYRenderHorariosEdicion(p);
 
     document.getElementById('editOverlay').classList.add('activo');
   }
@@ -593,6 +664,111 @@
     }
   }
 
+  // ── HORARIOS (dentro del modal de gestión) ──
+  const DIAS_ORDEN = [
+    { key: 'lun', label: 'Lunes' },
+    { key: 'mar', label: 'Martes' },
+    { key: 'mie', label: 'Miércoles' },
+    { key: 'jue', label: 'Jueves' },
+    { key: 'vie', label: 'Viernes' },
+    { key: 'sab', label: 'Sábado' },
+    { key: 'dom', label: 'Domingo' }
+  ];
+  let horarioEnEdicion = {};
+
+  async function cargarYRenderHorariosEdicion(p) {
+    const box = document.getElementById('editHorariosBox');
+
+    if (p.estado !== 'aprobado') {
+      box.innerHTML = '<p class="perfil-empty-reviews">Aprueba al proveedor para gestionar sus horarios.</p>';
+      horarioEnEdicion = {};
+      return;
+    }
+
+    box.innerHTML = '<p class="perfil-empty-reviews">Cargando horarios…</p>';
+
+    try {
+      await asegurarHorarioProveedor(p.id);
+      const datos = await cargarHorarios(p.id);
+      if (!proveedorEnEdicion || proveedorEnEdicion.id !== p.id) return;
+      horarioEnEdicion = datos;
+      renderHorariosEdicion();
+    } catch (error) {
+      console.error('Error al cargar horarios:', error);
+      box.innerHTML = '<p class="perfil-empty-reviews">Hubo un error al cargar los horarios.</p>';
+    }
+  }
+
+  function renderHorariosEdicion() {
+    const box = document.getElementById('editHorariosBox');
+    box.innerHTML = DIAS_ORDEN.map(d => {
+      const horas = (horarioEnEdicion[d.key] || []).slice().sort();
+      const chips = horas.length
+        ? horas.map(h => `
+            <span class="admin-hora-chip">${h}<button class="admin-hora-quitar" data-dia="${d.key}" data-hora="${h}">✕</button></span>
+          `).join('')
+        : '<span class="admin-hora-vacio">Sin horarios</span>';
+
+      return `
+        <div class="admin-horario-dia">
+          <p class="admin-horario-dia-label">${d.label}</p>
+          <div class="admin-horas-chips">${chips}</div>
+          <div class="admin-hora-add">
+            <input type="time" class="admin-hora-input" data-dia="${d.key}">
+            <button class="admin-hora-add-btn" data-dia="${d.key}">+ Agregar</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    box.querySelectorAll('.admin-hora-quitar').forEach(btn => {
+      btn.addEventListener('click', () => quitarHoraAdmin(btn.dataset.dia, btn.dataset.hora));
+    });
+    box.querySelectorAll('.admin-hora-add-btn').forEach(btn => {
+      btn.addEventListener('click', () => agregarHoraAdmin(btn.dataset.dia));
+    });
+  }
+
+  async function agregarHoraAdmin(dia) {
+    const input = getHoraInput(dia);
+    const hora  = input.value;
+    if (!hora) return;
+
+    const actuales = horarioEnEdicion[dia] || [];
+    if (actuales.includes(hora)) { input.value = ''; return; }
+
+    const anterior = horarioEnEdicion[dia];
+    horarioEnEdicion[dia] = [...actuales, hora].sort();
+    renderHorariosEdicion();
+
+    try {
+      await guardarHorario(proveedorEnEdicion.id, horarioEnEdicion);
+    } catch (error) {
+      console.error('Error al guardar horario:', error);
+      alert('Hubo un error al guardar el horario.');
+      horarioEnEdicion[dia] = anterior;
+      renderHorariosEdicion();
+    }
+  }
+
+  async function quitarHoraAdmin(dia, hora) {
+    const anterior = horarioEnEdicion[dia];
+    horarioEnEdicion[dia] = (horarioEnEdicion[dia] || []).filter(h => h !== hora);
+    renderHorariosEdicion();
+
+    try {
+      await guardarHorario(proveedorEnEdicion.id, horarioEnEdicion);
+    } catch (error) {
+      console.error('Error al guardar horario:', error);
+      alert('Hubo un error al eliminar el horario.');
+      horarioEnEdicion[dia] = anterior;
+      renderHorariosEdicion();
+    }
+  }
+
+  function getHoraInput(dia) {
+    return document.querySelector(`.admin-hora-input[data-dia="${dia}"]`);
+  }
+
   // ── CAMBIAR ESTADO ─────────────────────
   async function cambiarEstado(nuevoEstado) {
     try {
@@ -600,6 +776,13 @@
       proveedorEnEdicion.estado = nuevoEstado;
       document.getElementById('editEstadoBadge').textContent = nuevoEstado;
       document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${nuevoEstado}`;
+
+      if (nuevoEstado === 'aprobado') {
+        await asegurarHorarioProveedor(proveedorEnEdicion.id);
+        cargarYRenderHorariosEdicion(proveedorEnEdicion);
+      } else {
+        cargarYRenderHorariosEdicion(proveedorEnEdicion);
+      }
 
       // Actualizar caché y refrescar la cuadrícula de fondo
       const idx = proveedoresCache.findIndex(x => x.id === proveedorEnEdicion.id);
@@ -619,6 +802,7 @@
       email:        document.getElementById('editEmail').value.trim(),
       categoria:    document.getElementById('editCategoria').value,
       especialidad: document.getElementById('editEspecialidad').value.trim(),
+      ciudad:       document.getElementById('editCiudad').value,
       ubicacion:    document.getElementById('editUbicacion').value.trim(),
       experiencia:  document.getElementById('editExperiencia').value.trim(),
       descripcion:  document.getElementById('editDescripcion').value.trim()
@@ -658,6 +842,7 @@
         await eliminarFotoStorage(url);
       }
       await eliminarProveedor(proveedorEnEdicion.id);
+      await eliminarHorarioProveedor(proveedorEnEdicion.id);
 
       proveedoresCache = proveedoresCache.filter(x => x.id !== proveedorEnEdicion.id);
       cerrarEdicion();
