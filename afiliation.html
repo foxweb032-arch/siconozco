@@ -100,9 +100,23 @@
       </div>
 
       <div class="afil-group">
+        <label for="aEstado">Estado <span>*</span></label>
+        <select id="aEstado" onchange="alCambiarEstadoRegistro()"></select>
+        <span class="afil-error-msg" id="errEstado">Selecciona tu estado</span>
+      </div>
+
+      <div class="afil-group">
         <label for="aCiudad">Ciudad <span>*</span></label>
-        <select id="aCiudad"></select>
+        <select id="aCiudad" onchange="toggleCiudadOtra()" disabled>
+          <option value="" selected>Primero elige tu estado</option>
+        </select>
         <span class="afil-error-msg" id="errCiudad">Selecciona tu ciudad</span>
+      </div>
+
+      <div class="afil-group" id="grupoCiudadOtra" style="display:none;">
+        <label for="aCiudadOtra">Nombre de tu ciudad <span>*</span></label>
+        <input type="text" id="aCiudadOtra" placeholder="Ej. Querétaro">
+        <span class="afil-error-msg" id="errCiudadOtra">Escribe el nombre de tu ciudad</span>
       </div>
 
       <div class="afil-group">
@@ -160,6 +174,12 @@
       </div>
       <p class="fotos-nota">📌 Mínimo 3 fotos requeridas. Formatos: JPG, PNG, WEBP.</p>
       <p class="fotos-error" id="errFotos">Sube al menos 3 fotografías de tu trabajo</p>
+
+      <div class="afil-divider"></div>
+
+      <p class="afil-section-title">Horarios disponibles</p>
+      <p class="afil-horario-nota">Indica en qué días y horas sueles estar disponible. Es opcional — si prefieres, lo definimos juntos después de tu aprobación.</p>
+      <div id="horarioRegistroBox"></div>
 
       <div class="afil-divider"></div>
 
@@ -226,15 +246,36 @@
 
 <script type="module">
   import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-  import { storage, comprimirImagen, registrarProveedor, cargarCiudades } from './firebase.js';
+  import { storage, comprimirImagen, registrarProveedor, ESTADOS_MEXICO, cargarCiudadesPorEstado, guardarHorario } from './firebase.js';
 
-  // ── CIUDAD ─────────────────────────────
+  // ── ESTADO Y CIUDAD ────────────────────
+  const selectEstado = document.getElementById('aEstado');
   const selectCiudad = document.getElementById('aCiudad');
-  selectCiudad.innerHTML = '<option value="" disabled selected>Cargando ciudades…</option>';
-  cargarCiudades().then(ciudades => {
+
+  selectEstado.innerHTML = '<option value="" disabled selected>Selecciona tu estado</option>'
+    + ESTADOS_MEXICO.map(e => `<option value="${e}">${e}</option>`).join('');
+
+  async function alCambiarEstadoRegistro() {
+    const entidad = selectEstado.value;
+    selectCiudad.disabled = true;
+    selectCiudad.innerHTML = '<option value="" selected>Cargando ciudades…</option>';
+    document.getElementById('grupoCiudadOtra').style.display = 'none';
+    document.getElementById('aCiudadOtra').value = '';
+
+    const ciudades = await cargarCiudadesPorEstado(entidad);
     selectCiudad.innerHTML = '<option value="" disabled selected>Selecciona tu ciudad</option>'
-      + ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
-  });
+      + ciudades.map(c => `<option value="${c}">${c}</option>`).join('')
+      + '<option value="__otra__">Otra ciudad (especificar)</option>';
+    selectCiudad.disabled = false;
+  }
+  window.alCambiarEstadoRegistro = alCambiarEstadoRegistro;
+
+  function toggleCiudadOtra() {
+    const esOtra = selectCiudad.value === '__otra__';
+    document.getElementById('grupoCiudadOtra').style.display = esOtra ? 'block' : 'none';
+    if (!esOtra) document.getElementById('aCiudadOtra').value = '';
+  }
+  window.toggleCiudadOtra = toggleCiudadOtra;
 
   // ── MENU MÓVIL ────────────────────────
   function toggleMenu() {
@@ -310,6 +351,59 @@
     }
   }
 
+  // ── HORARIOS (se guardan localmente hasta enviar el formulario) ──
+  const DIAS_ORDEN_REGISTRO = [
+    { key: 'lun', label: 'Lunes' },
+    { key: 'mar', label: 'Martes' },
+    { key: 'mie', label: 'Miércoles' },
+    { key: 'jue', label: 'Jueves' },
+    { key: 'vie', label: 'Viernes' },
+    { key: 'sab', label: 'Sábado' },
+    { key: 'dom', label: 'Domingo' }
+  ];
+  const horarioRegistro = { lun: [], mar: [], mie: [], jue: [], vie: [], sab: [], dom: [] };
+
+  function renderHorarioRegistro() {
+    const box = document.getElementById('horarioRegistroBox');
+    box.innerHTML = DIAS_ORDEN_REGISTRO.map(d => {
+      const horas = horarioRegistro[d.key].slice().sort();
+      const chips = horas.length
+        ? horas.map(h => `
+            <span class="admin-hora-chip">${h}<button class="admin-hora-quitar" data-dia="${d.key}" data-hora="${h}">✕</button></span>
+          `).join('')
+        : '<span class="admin-hora-vacio">Sin horarios</span>';
+
+      return `
+        <div class="admin-horario-dia">
+          <p class="admin-horario-dia-label">${d.label}</p>
+          <div class="admin-horas-chips">${chips}</div>
+          <div class="admin-hora-add">
+            <input type="time" class="admin-hora-input" data-dia="${d.key}">
+            <button type="button" class="admin-hora-add-btn" data-dia="${d.key}">+ Agregar</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    box.querySelectorAll('.admin-hora-quitar').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dia = btn.dataset.dia, hora = btn.dataset.hora;
+        horarioRegistro[dia] = horarioRegistro[dia].filter(h => h !== hora);
+        renderHorarioRegistro();
+      });
+    });
+    box.querySelectorAll('.admin-hora-add-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const dia   = btn.dataset.dia;
+        const input = box.querySelector(`.admin-hora-input[data-dia="${dia}"]`);
+        const hora  = input.value;
+        if (!hora || horarioRegistro[dia].includes(hora)) return;
+        horarioRegistro[dia] = [...horarioRegistro[dia], hora].sort();
+        renderHorarioRegistro();
+      });
+    });
+  }
+  renderHorarioRegistro();
+
   // ── SUBIR FOTOS A STORAGE ─────────────
   // Sube todos los archivos en fotosSubidas y devuelve un array de URLs,
   // en el mismo orden en que se seleccionaron los slots.
@@ -336,7 +430,10 @@
     const experiencia  = document.getElementById('aExperiencia').value.trim();
     const profesion    = document.getElementById('aProfesion').value;
     const especialidad = document.getElementById('aEspecialidad').value.trim();
-    const ciudad       = document.getElementById('aCiudad').value;
+    const entidad      = document.getElementById('aEstado').value;
+    const ciudadSelect = document.getElementById('aCiudad').value;
+    const ciudadOtra   = document.getElementById('aCiudadOtra').value.trim();
+    const ciudad       = ciudadSelect === '__otra__' ? ciudadOtra : ciudadSelect;
     const ubicacion    = document.getElementById('aUbicacion').value.trim();
     const descripcion  = document.getElementById('aDescripcion').value.trim();
     const acepta       = document.getElementById('aceptaTerminos').checked;
@@ -349,7 +446,11 @@
     valido = validar('aEmail',        'errEmail',        emailRegex.test(email))     && valido;
     valido = validar('aProfesion',    'errProfesion',    profesion !== '')            && valido;
     valido = validar('aEspecialidad', 'errEspecialidad', especialidad.length > 1)    && valido;
-    valido = validar('aCiudad',       'errCiudad',       ciudad !== '')               && valido;
+    valido = validar('aEstado',       'errEstado',       entidad !== '')               && valido;
+    valido = validar('aCiudad',       'errCiudad',       ciudadSelect !== '')          && valido;
+    if (ciudadSelect === '__otra__') {
+      valido = validar('aCiudadOtra', 'errCiudadOtra',   ciudadOtra.length > 1)        && valido;
+    }
     valido = validar('aUbicacion',    'errUbicacion',    ubicacion.length > 3)       && valido;
     valido = validar('aDescripcion',  'errDescripcion',  descripcion.length > 10)    && valido;
 
@@ -379,18 +480,26 @@
       btn.textContent = 'Enviando...';
 
       // 2. Guardar en Firestore con estado "pendiente" y generar folio corto
-      const { folio } = await registrarProveedor({
+      const { id, folio } = await registrarProveedor({
         nombre,
         telefono:    tel,
         email,
         experiencia,
         categoria:   profesion,
         especialidad,
+        entidad,
         ciudad,
         ubicacion,
         descripcion,
         fotos:       urlsFotos
       });
+
+      // 3. Guardar el horario propuesto (si el proveedor cargó alguno)
+      try {
+        await guardarHorario(id, horarioRegistro);
+      } catch (error) {
+        console.error('Error al guardar el horario inicial:', error);
+      }
 
       document.getElementById('afilFolioTexto').textContent = folio;
       document.getElementById('formContent').style.display = 'none';

@@ -79,61 +79,85 @@ async function registrarProveedor(datos) {
   return { id: nuevoProveedorRef.id, folio };
 }
 
-// ── CIUDADES DISPONIBLES (gestionadas desde el admin) Y SELECCIÓN DEL VISITANTE ──
-const CIUDADES_POR_DEFECTO = ['Saltillo', 'Morelia'];
-const CIUDAD_POR_DEFECTO   = 'Saltillo';
-const CIUDAD_STORAGE_KEY   = 'sc_ciudad';
+// ── ESTADOS Y CIUDADES (jerárquico) Y SELECCIÓN DEL VISITANTE ──
 
-// Lee la lista de ciudades activas desde Firestore (documento único config/ciudades).
-// Si no existe todavía o falla la lectura, regresa una lista de respaldo para que el sitio nunca se quede sin opciones.
-async function cargarCiudades() {
+// Los 32 estados de México — lista fija, no requiere Firestore porque no cambia.
+const ESTADOS_MEXICO = [
+  'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche',
+  'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima',
+  'Durango', 'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo',
+  'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca',
+  'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa',
+  'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
+];
+
+// Respaldo para proveedores registrados antes de este cambio, que no tienen campo "entidad".
+const ENTIDAD_POR_CIUDAD_LEGADO = { 'Saltillo': 'Coahuila', 'Morelia': 'Michoacán' };
+
+const UBICACIONES_POR_DEFECTO = { 'Coahuila': ['Saltillo'], 'Michoacán': ['Morelia'] };
+const UBICACION_STORAGE_KEY   = 'sc_ubicacion';
+const UBICACION_POR_DEFECTO   = { entidad: 'Coahuila', ciudad: 'Saltillo' };
+
+// Lee el mapa completo { Estado: [ciudad, ...] } desde Firestore (documento único config/ubicaciones).
+async function cargarUbicaciones() {
   try {
-    const ref  = doc(db, 'config', 'ciudades');
+    const ref  = doc(db, 'config', 'ubicaciones');
     const snap = await getDoc(ref);
-    if (snap.exists() && Array.isArray(snap.data().lista) && snap.data().lista.length > 0) {
-      return snap.data().lista;
+    if (snap.exists() && snap.data().mapa && typeof snap.data().mapa === 'object') {
+      return snap.data().mapa;
     }
-    return CIUDADES_POR_DEFECTO;
   } catch (error) {
-    console.error('Error cargando ciudades:', error);
-    return CIUDADES_POR_DEFECTO;
+    console.error('Error cargando ubicaciones:', error);
+  }
+  return UBICACIONES_POR_DEFECTO;
+}
+
+// Ciudades curadas dentro de un estado específico.
+async function cargarCiudadesPorEstado(entidad) {
+  const mapa = await cargarUbicaciones();
+  return mapa[entidad] || [];
+}
+
+// ── AGREGAR CIUDAD A UN ESTADO (ADMIN) ──
+async function agregarCiudad(entidad, ciudad) {
+  const nombreEntidad = (entidad || '').trim();
+  const nombreCiudad  = (ciudad || '').trim();
+  if (!nombreEntidad || !nombreCiudad) return;
+  const ref  = doc(db, 'config', 'ubicaciones');
+  const mapa = await cargarUbicaciones();
+  const actuales = mapa[nombreEntidad] || [];
+  if (actuales.some(c => c.toLowerCase() === nombreCiudad.toLowerCase())) return;
+  mapa[nombreEntidad] = [...actuales, nombreCiudad];
+  await setDoc(ref, { mapa });
+}
+
+// ── ELIMINAR CIUDAD DE UN ESTADO (ADMIN) ──
+async function eliminarCiudad(entidad, ciudad) {
+  const ref  = doc(db, 'config', 'ubicaciones');
+  const mapa = await cargarUbicaciones();
+  const actuales = mapa[entidad] || [];
+  mapa[entidad] = actuales.filter(c => c !== ciudad);
+  if (mapa[entidad].length === 0) delete mapa[entidad];
+  await setDoc(ref, { mapa });
+}
+
+function obtenerUbicacionActual() {
+  try {
+    const raw = localStorage.getItem(UBICACION_STORAGE_KEY);
+    if (!raw) return UBICACION_POR_DEFECTO;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.entidad && parsed.ciudad) return parsed;
+    return UBICACION_POR_DEFECTO;
+  } catch (error) {
+    return UBICACION_POR_DEFECTO;
   }
 }
 
-// ── AGREGAR CIUDAD (ADMIN) ──
-async function agregarCiudad(ciudad) {
-  const nombre = (ciudad || '').trim();
-  if (!nombre) return;
-  const ref  = doc(db, 'config', 'ciudades');
-  const snap = await getDoc(ref);
-  const actuales = (snap.exists() && Array.isArray(snap.data().lista)) ? snap.data().lista : CIUDADES_POR_DEFECTO;
-  if (actuales.some(c => c.toLowerCase() === nombre.toLowerCase())) return;
-  await setDoc(ref, { lista: [...actuales, nombre] });
-}
-
-// ── ELIMINAR CIUDAD (ADMIN) ──
-async function eliminarCiudad(ciudad) {
-  const ref  = doc(db, 'config', 'ciudades');
-  const snap = await getDoc(ref);
-  const actuales = (snap.exists() && Array.isArray(snap.data().lista)) ? snap.data().lista : CIUDADES_POR_DEFECTO;
-  const nuevas = actuales.filter(c => c !== ciudad);
-  if (nuevas.length === 0) throw new Error('Debe quedar al menos una ciudad disponible.');
-  await setDoc(ref, { lista: nuevas });
-}
-
-function obtenerCiudadActual() {
+function guardarUbicacionActual(entidad, ciudad) {
   try {
-    return localStorage.getItem(CIUDAD_STORAGE_KEY) || CIUDAD_POR_DEFECTO;
+    localStorage.setItem(UBICACION_STORAGE_KEY, JSON.stringify({ entidad, ciudad }));
   } catch (error) {
-    return CIUDAD_POR_DEFECTO;
-  }
-}
-
-function guardarCiudadActual(ciudad) {
-  try {
-    localStorage.setItem(CIUDAD_STORAGE_KEY, ciudad);
-  } catch (error) {
-    console.warn('No se pudo guardar la ciudad seleccionada:', error);
+    console.warn('No se pudo guardar la ubicación seleccionada:', error);
   }
 }
 
@@ -403,7 +427,9 @@ async function marcarMensajeRespondido(mensajeId, respondido) {
 
 export {
   db, auth, storage,
-  cargarCiudades, agregarCiudad, eliminarCiudad, obtenerCiudadActual, guardarCiudadActual,
+  ESTADOS_MEXICO, ENTIDAD_POR_CIUDAD_LEGADO,
+  cargarUbicaciones, cargarCiudadesPorEstado, agregarCiudad, eliminarCiudad,
+  obtenerUbicacionActual, guardarUbicacionActual,
   registrarProveedor,
   cargarHorarios, cargarProveedores, cargarResenas, enviarResena, eliminarResena,
   loginAdmin, logoutAdmin, onAuthChange,
