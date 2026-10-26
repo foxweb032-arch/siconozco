@@ -193,9 +193,9 @@
     asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarHorarios, guardarHorario,
     ESTADOS_MEXICO, ENTIDAD_POR_CIUDAD_LEGADO, cargarUbicaciones, cargarCiudadesPorEstado, agregarCiudad, eliminarCiudad,
-    cargarReservaciones, marcarReservacion, actualizarReservacion,
-    cargarMensajes, marcarMensajeRespondido,
-    escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
+    marcarReservacion, actualizarReservacion,
+    marcarMensajeRespondido,
+    escucharProveedores, escucharReservaciones, escucharMensajes
   } from './firebase.js';
 
   let proveedoresCache = [];
@@ -216,23 +216,38 @@
     if (user) {
       document.getElementById('loginWrap').style.display = 'none';
       document.getElementById('dashboardWrap').style.display = 'block';
-      cargarYRenderizar();
-      iniciarListenersNotificaciones();
+      iniciarListenersAdmin();
     } else {
       document.getElementById('loginWrap').style.display = 'flex';
       document.getElementById('dashboardWrap').style.display = 'none';
-      detenerListenersNotificaciones();
+      detenerListenersAdmin();
     }
   });
 
-  function iniciarListenersNotificaciones() {
-    detenerListenersNotificaciones();
-    unsubProveedores   = escucharPendientesProveedores(n => actualizarBadge('badgeProveedores', n));
-    unsubReservaciones = escucharPendientesReservaciones(n => actualizarBadge('badgeReservaciones', n));
-    unsubMensajes       = escucharPendientesMensajes(n => actualizarBadge('badgeMensajes', n));
+  // Un solo listener por colección: mantiene al día la lista visible Y el contador de la pestaña.
+  function iniciarListenersAdmin() {
+    detenerListenersAdmin();
+
+    unsubProveedores = escucharProveedores(lista => {
+      proveedoresCache = lista;
+      renderGrid();
+      actualizarBadge('badgeProveedores', lista.filter(p => (p.estado || 'pendiente') === 'pendiente').length);
+    });
+
+    unsubReservaciones = escucharReservaciones(lista => {
+      reservacionesCache = lista;
+      renderReservaciones();
+      actualizarBadge('badgeReservaciones', lista.filter(r => (r.estado || 'pendiente') === 'pendiente').length);
+    });
+
+    unsubMensajes = escucharMensajes(lista => {
+      mensajesCache = lista;
+      renderMensajes();
+      actualizarBadge('badgeMensajes', lista.filter(m => !m.respondido).length);
+    });
   }
 
-  function detenerListenersNotificaciones() {
+  function detenerListenersAdmin() {
     if (unsubProveedores)   { unsubProveedores(); unsubProveedores = null; }
     if (unsubReservaciones) { unsubReservaciones(); unsubReservaciones = null; }
     if (unsubMensajes)      { unsubMensajes(); unsubMensajes = null; }
@@ -265,12 +280,6 @@
 
   async function hacerLogout() {
     await logoutAdmin();
-  }
-
-  // ── CARGAR Y RENDERIZAR TARJETAS ───────
-  async function cargarYRenderizar() {
-    proveedoresCache = await cargarTodosLosProveedores();
-    renderGrid();
   }
 
   function cambiarFiltro(estado) {
@@ -476,9 +485,6 @@
     document.getElementById('seccionProveedores').style.display    = seccion === 'proveedores'    ? 'block' : 'none';
     document.getElementById('seccionReservaciones').style.display  = seccion === 'reservaciones'  ? 'block' : 'none';
     document.getElementById('seccionMensajes').style.display       = seccion === 'mensajes'        ? 'block' : 'none';
-
-    if (seccion === 'reservaciones' && reservacionesCache.length === 0) cargarYRenderizarReservaciones();
-    if (seccion === 'mensajes'      && mensajesCache.length === 0)      cargarYRenderizarMensajes();
   }
 
   function formatearFecha(iso) {
@@ -492,11 +498,6 @@
   }
 
   // ── RESERVACIONES ────────────────────────
-  async function cargarYRenderizarReservaciones() {
-    reservacionesCache = await cargarReservaciones();
-    renderReservaciones();
-  }
-
   function cambiarFiltroReserva(estado) {
     reservaFiltro = estado;
     document.querySelectorAll('#reservaTabs .admin-tab').forEach(t => {
@@ -507,6 +508,16 @@
 
   function renderReservaciones() {
     const cont = document.getElementById('reservacionesList');
+
+    // Como la lista se actualiza sola, conservamos lo que el admin esté escribiendo en una nota sin guardar
+    const notasSinGuardar = {};
+    let foco = null;
+    cont.querySelectorAll('textarea[data-nota-id]').forEach(t => {
+      const id = t.dataset.notaId;
+      const guardada = (reservacionesCache.find(x => x.id === id) || {}).comentarioAdmin || '';
+      if (t.value !== guardada) notasSinGuardar[id] = t.value;
+      if (document.activeElement === t) foco = { id, inicio: t.selectionStart, fin: t.selectionEnd };
+    });
     const lista = reservaFiltro === 'todas'
       ? reservacionesCache
       : reservacionesCache.filter(r => (r.estado || 'pendiente') === reservaFiltro);
@@ -552,6 +563,15 @@
     cont.querySelectorAll('.admin-btn-guardar-nota').forEach(btn => {
       btn.addEventListener('click', () => guardarNotaReservacion(btn.dataset.notaId));
     });
+
+    Object.entries(notasSinGuardar).forEach(([id, valor]) => {
+      const t = cont.querySelector(`textarea[data-nota-id="${id}"]`);
+      if (t) t.value = valor;
+    });
+    if (foco) {
+      const t = cont.querySelector(`textarea[data-nota-id="${foco.id}"]`);
+      if (t) { t.focus(); t.setSelectionRange(foco.inicio, foco.fin); }
+    }
   }
 
   async function guardarNotaReservacion(id) {
@@ -584,11 +604,6 @@
   }
 
   // ── MENSAJES DE CONTACTO ─────────────────
-  async function cargarYRenderizarMensajes() {
-    mensajesCache = await cargarMensajes();
-    renderMensajes();
-  }
-
   function renderMensajes() {
     const cont = document.getElementById('mensajesList');
     if (mensajesCache.length === 0) {

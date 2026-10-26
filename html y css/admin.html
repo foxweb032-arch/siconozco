@@ -41,9 +41,22 @@
       <button class="admin-tab" data-estado="pendiente" onclick="cambiarFiltro('pendiente')">Pendientes</button>
       <button class="admin-tab" data-estado="aprobado" onclick="cambiarFiltro('aprobado')">Aprobados</button>
       <button class="admin-tab" data-estado="rechazado" onclick="cambiarFiltro('rechazado')">Rechazados</button>
-      <select class="admin-ciudad-filtro" id="filtroCiudadSelect" onchange="cambiarFiltroCiudad(this.value)">
+      <select class="admin-ciudad-filtro" id="filtroEntidadSelect" onchange="cambiarFiltroEntidad(this.value)">
+        <option value="todas">Todos los estados</option>
+      </select>
+      <select class="admin-ciudad-filtro" id="filtroCiudadSelect" onchange="cambiarFiltroCiudad(this.value)" disabled>
         <option value="todas">Todas las ciudades</option>
       </select>
+    </div>
+
+    <div class="admin-ciudades-panel">
+      <p class="admin-ciudades-titulo">Ciudades activas por estado</p>
+      <select class="admin-ciudad-estado-gestion" id="gestionEntidadSelect" onchange="alCambiarEstadoGestion()"></select>
+      <div class="admin-ciudades-chips" id="ciudadesChips"></div>
+      <div class="admin-ciudad-add">
+        <input type="text" id="nuevaCiudadInput" placeholder="Nombre de la ciudad nueva">
+        <button onclick="agregarCiudadClick()">+ Agregar ciudad</button>
+      </div>
     </div>
 
     <div class="admin-grid" id="adminGrid">
@@ -97,7 +110,7 @@
 
       <p class="perfil-reviews-title">Horarios</p>
       <div class="admin-horarios-box" id="editHorariosBox">
-        <p class="perfil-empty-reviews">Aprueba al proveedor para gestionar sus horarios.</p>
+        <p class="perfil-empty-reviews">Cargando horarios…</p>
       </div>
 
       <p class="perfil-reviews-title">Fotos</p>
@@ -143,6 +156,10 @@
         <input type="text" id="editEspecialidad">
       </div>
       <div class="admin-field">
+        <label>Estado</label>
+        <select id="editEntidad" onchange="alCambiarEstadoEdicion()"></select>
+      </div>
+      <div class="admin-field">
         <label>Ciudad</label>
         <select id="editCiudad"></select>
       </div>
@@ -175,7 +192,7 @@
     cargarResenas, eliminarResena,
     asegurarHorarioProveedor, eliminarHorarioProveedor,
     cargarHorarios, guardarHorario,
-    CIUDADES_DISPONIBLES,
+    ESTADOS_MEXICO, ENTIDAD_POR_CIUDAD_LEGADO, cargarUbicaciones, cargarCiudadesPorEstado, agregarCiudad, eliminarCiudad,
     cargarReservaciones, marcarReservacion, actualizarReservacion,
     cargarMensajes, marcarMensajeRespondido,
     escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
@@ -183,6 +200,7 @@
 
   let proveedoresCache = [];
   let filtroActual      = 'todos';
+  let filtroEntidadActual = 'todas';
   let filtroCiudadActual = 'todas';
   let proveedorEnEdicion = null; // objeto completo del proveedor abierto
   let reservacionesCache = [];
@@ -269,14 +287,63 @@
     vidriero: '🪟', jardinero: '🍃'
   };
 
-  function poblarSelectsCiudad() {
-    const opciones = CIUDADES_DISPONIBLES.map(c => `<option value="${c}">${c}</option>`).join('');
-    document.getElementById('editCiudad').innerHTML = opciones;
-
-    const filtroSelect = document.getElementById('filtroCiudadSelect');
-    filtroSelect.innerHTML = '<option value="todas">Todas las ciudades</option>' + opciones;
+  function entidadDe(p) {
+    return p.entidad || ENTIDAD_POR_CIUDAD_LEGADO[p.ciudad] || '';
   }
-  poblarSelectsCiudad();
+
+  async function poblarSelectsUbicacion() {
+    const mapa = await cargarUbicaciones();
+    const entidadesConCiudades = Object.keys(mapa).filter(e => mapa[e] && mapa[e].length > 0);
+
+    // Filtro de estado: solo estados que ya tienen ciudades activas
+    const filtroEntidadSelect = document.getElementById('filtroEntidadSelect');
+    const entidadPrevia = filtroEntidadSelect.value || 'todas';
+    filtroEntidadSelect.innerHTML = '<option value="todas">Todos los estados</option>'
+      + entidadesConCiudades.map(e => `<option value="${e}">${e}</option>`).join('');
+    filtroEntidadSelect.value = entidadesConCiudades.includes(entidadPrevia) ? entidadPrevia : 'todas';
+    filtroEntidadActual = filtroEntidadSelect.value;
+    poblarFiltroCiudad(mapa);
+
+    // Panel de gestión: los 32 estados, para poder abrir uno nuevo
+    const gestionSelect = document.getElementById('gestionEntidadSelect');
+    const gestionPrevio = gestionSelect.value || 'Coahuila';
+    gestionSelect.innerHTML = ESTADOS_MEXICO.map(e => `<option value="${e}">${e}</option>`).join('');
+    gestionSelect.value = gestionPrevio;
+    renderChipsCiudades(mapa[gestionSelect.value] || []);
+
+    // Modal de edición
+    const editEntidadSelect = document.getElementById('editEntidad');
+    const editEntidadPrevio = editEntidadSelect.value;
+    editEntidadSelect.innerHTML = ESTADOS_MEXICO.map(e => `<option value="${e}">${e}</option>`).join('');
+    if (editEntidadPrevio) editEntidadSelect.value = editEntidadPrevio;
+    poblarEditCiudad(mapa[editEntidadSelect.value] || [], document.getElementById('editCiudad').value);
+
+    if (document.getElementById('adminGrid')) renderGrid();
+  }
+  poblarSelectsUbicacion();
+
+  function poblarFiltroCiudad(mapa) {
+    const filtroCiudadSelect = document.getElementById('filtroCiudadSelect');
+    if (filtroEntidadActual === 'todas') {
+      filtroCiudadSelect.innerHTML = '<option value="todas">Todas las ciudades</option>';
+      filtroCiudadSelect.disabled = true;
+      filtroCiudadActual = 'todas';
+      return;
+    }
+    const ciudades = mapa[filtroEntidadActual] || [];
+    filtroCiudadSelect.innerHTML = '<option value="todas">Todas las ciudades</option>'
+      + ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+    filtroCiudadSelect.disabled = false;
+    filtroCiudadActual = 'todas';
+  }
+
+  async function cambiarFiltroEntidad(entidad) {
+    filtroEntidadActual = entidad;
+    const mapa = await cargarUbicaciones();
+    poblarFiltroCiudad(mapa);
+    renderGrid();
+  }
+  window.cambiarFiltroEntidad = cambiarFiltroEntidad;
 
   function cambiarFiltroCiudad(ciudad) {
     filtroCiudadActual = ciudad;
@@ -284,12 +351,78 @@
   }
   window.cambiarFiltroCiudad = cambiarFiltroCiudad;
 
+  function renderChipsCiudades(ciudades) {
+    const chips = document.getElementById('ciudadesChips');
+    if (ciudades.length === 0) {
+      chips.innerHTML = '<span class="admin-hora-vacio">Sin ciudades agregadas todavía en este estado</span>';
+      return;
+    }
+    chips.innerHTML = ciudades.map(c => `
+      <span class="admin-ciudad-chip">${c}
+        <button class="admin-ciudad-chip-x" data-ciudad="${c}" title="Eliminar ${c}">✕</button>
+      </span>
+    `).join('');
+    chips.querySelectorAll('.admin-ciudad-chip-x').forEach(btn => {
+      btn.addEventListener('click', () => quitarCiudadClick(btn.dataset.ciudad));
+    });
+  }
+
+  async function alCambiarEstadoGestion() {
+    const entidad = document.getElementById('gestionEntidadSelect').value;
+    const mapa = await cargarUbicaciones();
+    renderChipsCiudades(mapa[entidad] || []);
+  }
+  window.alCambiarEstadoGestion = alCambiarEstadoGestion;
+
+  async function agregarCiudadClick() {
+    const entidad = document.getElementById('gestionEntidadSelect').value;
+    const input   = document.getElementById('nuevaCiudadInput');
+    const nombre  = input.value.trim();
+    if (!nombre) return;
+    try {
+      await agregarCiudad(entidad, nombre);
+      input.value = '';
+      await poblarSelectsUbicacion();
+    } catch (error) {
+      console.error('Error al agregar ciudad:', error);
+      alert('Hubo un error al agregar la ciudad.');
+    }
+  }
+  window.agregarCiudadClick = agregarCiudadClick;
+
+  async function quitarCiudadClick(ciudad) {
+    const entidad = document.getElementById('gestionEntidadSelect').value;
+    if (!confirm(`¿Quitar "${ciudad}" de ${entidad}?\n\nLos proveedores ya registrados ahí no se borran ni se mueven, solo dejará de aparecer como opción para nuevos visitantes y proveedores.`)) return;
+    try {
+      await eliminarCiudad(entidad, ciudad);
+      await poblarSelectsUbicacion();
+    } catch (error) {
+      alert(error.message || 'Hubo un error al eliminar la ciudad.');
+    }
+  }
+
+  function poblarEditCiudad(ciudades, valorPrevio) {
+    const select = document.getElementById('editCiudad');
+    select.innerHTML = ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (ciudades.includes(valorPrevio)) select.value = valorPrevio;
+  }
+
+  async function alCambiarEstadoEdicion() {
+    const entidad = document.getElementById('editEntidad').value;
+    const ciudades = await cargarCiudadesPorEstado(entidad);
+    poblarEditCiudad(ciudades, '');
+  }
+  window.alCambiarEstadoEdicion = alCambiarEstadoEdicion;
+
   function renderGrid() {
     const grid = document.getElementById('adminGrid');
     let lista = filtroActual === 'todos'
       ? proveedoresCache
       : proveedoresCache.filter(p => p.estado === filtroActual);
 
+    if (filtroEntidadActual !== 'todas') {
+      lista = lista.filter(p => entidadDe(p) === filtroEntidadActual);
+    }
     if (filtroCiudadActual !== 'todas') {
       lista = lista.filter(p => (p.ciudad || 'Saltillo') === filtroCiudadActual);
     }
@@ -315,7 +448,7 @@
           <span class="admin-status-badge admin-status-${p.estado || 'pendiente'}">${p.estado || 'pendiente'}</span>
           <h3>${p.nombre}</h3>
           <p>${p.especialidad || ''}</p>
-          <p class="admin-card-ciudad">📍 ${p.ciudad || 'Saltillo'}</p>
+          <p class="admin-card-ciudad">📍 ${p.ciudad || 'Saltillo'}${entidadDe(p) ? ', ' + entidadDe(p) : ''}</p>
           ${p.folio ? `<p class="admin-card-folio">Folio: <strong>${p.folio}</strong></p>` : ''}
           <div class="admin-card-id">
             <span>ID: ${p.id}</span>
@@ -525,7 +658,11 @@
     document.getElementById('editEmail').value        = p.email || '';
     document.getElementById('editCategoria').value    = p.categoria || 'electricista';
     document.getElementById('editEspecialidad').value = p.especialidad || '';
-    document.getElementById('editCiudad').value        = p.ciudad || 'Saltillo';
+    const entidadProveedor = entidadDe(p) || 'Coahuila';
+    document.getElementById('editEntidad').value = entidadProveedor;
+    cargarCiudadesPorEstado(entidadProveedor).then(ciudades => {
+      poblarEditCiudad(ciudades, p.ciudad || '');
+    });
     document.getElementById('editUbicacion').value    = p.ubicacion || '';
     document.getElementById('editExperiencia').value  = p.experiencia || '';
     document.getElementById('editDescripcion').value  = p.descripcion || '';
@@ -678,13 +815,6 @@
 
   async function cargarYRenderHorariosEdicion(p) {
     const box = document.getElementById('editHorariosBox');
-
-    if (p.estado !== 'aprobado') {
-      box.innerHTML = '<p class="perfil-empty-reviews">Aprueba al proveedor para gestionar sus horarios.</p>';
-      horarioEnEdicion = {};
-      return;
-    }
-
     box.innerHTML = '<p class="perfil-empty-reviews">Cargando horarios…</p>';
 
     try {
@@ -777,11 +907,16 @@
       document.getElementById('editEstadoBadge').textContent = nuevoEstado;
       document.getElementById('editEstadoBadge').className   = `admin-status-badge admin-status-${nuevoEstado}`;
 
-      if (nuevoEstado === 'aprobado') {
-        await asegurarHorarioProveedor(proveedorEnEdicion.id);
-        cargarYRenderHorariosEdicion(proveedorEnEdicion);
-      } else {
-        cargarYRenderHorariosEdicion(proveedorEnEdicion);
+      cargarYRenderHorariosEdicion(proveedorEnEdicion);
+
+      if (nuevoEstado === 'aprobado' && proveedorEnEdicion.ciudad) {
+        try {
+          const entidadParaAgregar = entidadDe(proveedorEnEdicion) || 'Coahuila';
+          await agregarCiudad(entidadParaAgregar, proveedorEnEdicion.ciudad);
+          await poblarSelectsUbicacion();
+        } catch (error) {
+          console.error('Error al agregar la ciudad automáticamente:', error);
+        }
       }
 
       // Actualizar caché y refrescar la cuadrícula de fondo
@@ -802,6 +937,7 @@
       email:        document.getElementById('editEmail').value.trim(),
       categoria:    document.getElementById('editCategoria').value,
       especialidad: document.getElementById('editEspecialidad').value.trim(),
+      entidad:      document.getElementById('editEntidad').value,
       ciudad:       document.getElementById('editCiudad').value,
       ubicacion:    document.getElementById('editUbicacion').value.trim(),
       experiencia:  document.getElementById('editExperiencia').value.trim(),

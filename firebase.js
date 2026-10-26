@@ -345,29 +345,35 @@ async function guardarHorario(proveedorId, datosHorario) {
   await setDoc(horarioRef, datosHorario);
 }
 
-// ── ESCUCHAR CONTADORES EN TIEMPO REAL (ADMIN) ──
+// ── ESCUCHAR LISTAS EN TIEMPO REAL (ADMIN) ──
 // Cada función devuelve un "unsubscribe" que hay que llamar al cerrar sesión.
-function escucharPendientesProveedores(callback) {
-  const q = query(collection(db, 'proveedores'), where('estado', '==', 'pendiente'));
-  return onSnapshot(q,
-    (snapshot) => callback(snapshot.size),
-    (error) => console.error('Error escuchando proveedores pendientes:', error)
+// Tras la carga inicial, Firestore solo cobra lectura por los documentos que cambian.
+function mapearDocs(snapshot) {
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+function porFechaCreacionDesc(a, b) {
+  return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
+}
+
+function escucharProveedores(callback) {
+  return onSnapshot(collection(db, 'proveedores'),
+    (snapshot) => callback(mapearDocs(snapshot)),
+    (error) => console.error('Error escuchando proveedores:', error)
   );
 }
 
-function escucharPendientesReservaciones(callback) {
-  const q = query(collection(db, 'reservaciones'), where('estado', '==', 'pendiente'));
-  return onSnapshot(q,
-    (snapshot) => callback(snapshot.size),
-    (error) => console.error('Error escuchando reservaciones pendientes:', error)
+function escucharReservaciones(callback) {
+  return onSnapshot(collection(db, 'reservaciones'),
+    (snapshot) => callback(mapearDocs(snapshot).sort(porFechaCreacionDesc)),
+    (error) => console.error('Error escuchando reservaciones:', error)
   );
 }
 
-function escucharPendientesMensajes(callback) {
-  const q = query(collection(db, 'mensajes'), where('respondido', '==', false));
-  return onSnapshot(q,
-    (snapshot) => callback(snapshot.size),
-    (error) => console.error('Error escuchando mensajes pendientes:', error)
+function escucharMensajes(callback) {
+  return onSnapshot(collection(db, 'mensajes'),
+    (snapshot) => callback(mapearDocs(snapshot).sort(porFechaCreacionDesc)),
+    (error) => console.error('Error escuchando mensajes:', error)
   );
 }
 
@@ -438,6 +444,6 @@ export {
   asegurarHorarioProveedor, eliminarHorarioProveedor, guardarHorario,
   guardarReservacion, cargarReservaciones, marcarReservacion, actualizarReservacion,
   guardarMensaje, cargarMensajes, marcarMensajeRespondido,
-  escucharPendientesProveedores, escucharPendientesReservaciones, escucharPendientesMensajes
+  escucharProveedores, escucharReservaciones, escucharMensajes
 };
 
