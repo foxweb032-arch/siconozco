@@ -283,6 +283,18 @@
   </div>
 </div>
 
+<!-- LIGHTBOX DE FOTOS -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Galería de fotos" aria-hidden="true">
+  <div class="lightbox-main">
+    <button type="button" class="lightbox-close" onclick="cerrarLightbox()" aria-label="Cerrar galería">✕</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+    <button type="button" class="lightbox-arrow lightbox-arrow-left" onclick="lightboxNav(-1)" aria-label="Foto anterior">‹</button>
+    <div class="lightbox-stage" id="lightboxStage"><img id="lightboxImg" alt="" draggable="false"></div>
+    <button type="button" class="lightbox-arrow lightbox-arrow-right" onclick="lightboxNav(1)" aria-label="Foto siguiente">›</button>
+  </div>
+  <div class="lightbox-thumbs" id="lightboxThumbs"></div>
+</div>
+
 <!-- MODAL DE PERFIL DE PROVEEDOR -->
 <div class="modal-overlay" id="perfilOverlay" onclick="cerrarPerfilSiFondo(event)">
   <div class="modal-box perfil-box">
@@ -515,46 +527,153 @@
 
   // ── PERFIL DE PROVEEDOR ───────────────
   // ── GALERÍA DEL PERFIL ────────────────
-  // Escritorio (≥769px): todas las fotos en fila, tamaño uniforme, con flechas si hay más de 5
-  // Móvil: se queda igual — foto principal + miniaturas + "+N fotos"
+  // Escritorio (≥769px): fila con scroll horizontal real (snap) y flechas según el desbordamiento.
+  // Móvil: foto principal + miniaturas + "+N fotos".
+  // En ambos, clic en una foto abre el lightbox con todas las fotos.
+  let galeriaFotos      = [];
+  let galeriaCategoria  = '';
+  let galeriaEscritorio = window.innerWidth >= 769;
+
   function renderGaleria(fotos, categoria) {
-    const gallery    = document.getElementById('perfilGallery');
-    const arrowLeft  = document.getElementById('perfilArrowLeft');
-    const arrowRight = document.getElementById('perfilArrowRight');
-    const esEscritorio = window.innerWidth >= 769;
+    const gallery = document.getElementById('perfilGallery');
+    galeriaFotos      = fotos;
+    galeriaCategoria  = categoria;
+    galeriaEscritorio = window.innerWidth >= 769;
+    gallery.scrollTo({ left: 0, behavior: 'instant' });
 
     if (fotos.length === 0) {
       const emoji = EMOJIS_CAT[categoria] || '🔧';
       gallery.innerHTML = `<div class="perfil-gallery-placeholder">${emoji}</div>`;
-      arrowLeft.style.display  = 'none';
-      arrowRight.style.display = 'none';
-      return;
-    }
-
-    if (esEscritorio) {
-      gallery.innerHTML = fotos.map(f => `<img src="${f}" alt="">`).join('');
-      const mostrarFlechas = fotos.length > 5;
-      arrowLeft.style.display  = mostrarFlechas ? 'flex' : 'none';
-      arrowRight.style.display = mostrarFlechas ? 'flex' : 'none';
+    } else if (galeriaEscritorio) {
+      gallery.innerHTML = fotos.map((f, i) =>
+        `<img src="${f}" alt="Foto ${i + 1} de ${fotos.length}" data-idx="${i}">`).join('');
     } else {
-      let html = `<img class="perfil-main" src="${fotos[0]}" alt="">`;
+      let html = `<img class="perfil-main" src="${fotos[0]}" alt="Foto 1 de ${fotos.length}" data-idx="0">`;
       fotos.slice(1, 4).forEach((f, i) => {
+        const idx = i + 1;
         if (i === 2 && fotos.length > 4) {
-          html += `<div class="perfil-gallery-more" data-extra="+${fotos.length - 4} fotos"><img src="${f}" alt=""></div>`;
+          html += `<div class="perfil-gallery-more" data-idx="${idx}" data-extra="+${fotos.length - 4} fotos"><img src="${f}" alt=""></div>`;
         } else {
-          html += `<img src="${f}" alt="">`;
+          html += `<img src="${f}" alt="Foto ${idx + 1} de ${fotos.length}" data-idx="${idx}">`;
         }
       });
       gallery.innerHTML = html;
-      arrowLeft.style.display  = 'none';
-      arrowRight.style.display = 'none';
     }
+    actualizarFlechasGaleria();
+  }
+
+  // Las flechas dependen del desbordamiento real y de la posición del scroll
+  function actualizarFlechasGaleria() {
+    const g   = document.getElementById('perfilGallery');
+    const izq = document.getElementById('perfilArrowLeft');
+    const der = document.getElementById('perfilArrowRight');
+    const maxScroll = g.scrollWidth - g.clientWidth;
+    const desborda  = galeriaEscritorio && maxScroll > 2;
+    izq.style.display = (desborda && g.scrollLeft > 2)             ? 'flex' : 'none';
+    der.style.display = (desborda && g.scrollLeft < maxScroll - 2) ? 'flex' : 'none';
   }
 
   function scrollGaleria(direccion) {
-    const gallery = document.getElementById('perfilGallery');
-    gallery.scrollBy({ left: direccion * gallery.clientWidth, behavior: 'smooth' });
+    const g = document.getElementById('perfilGallery');
+    g.scrollBy({ left: direccion * g.clientWidth * 0.9, behavior: 'smooth' });
   }
+
+  const galleryEl = document.getElementById('perfilGallery');
+  galleryEl.addEventListener('scroll', actualizarFlechasGaleria, { passive: true });
+  galleryEl.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-idx]');
+    if (el && galleryEl.contains(el)) abrirLightbox(Number(el.dataset.idx));
+  });
+  window.addEventListener('resize', () => {
+    const esEscritorio = window.innerWidth >= 769;
+    if (esEscritorio !== galeriaEscritorio && galeriaFotos.length) {
+      renderGaleria(galeriaFotos, galeriaCategoria);
+    } else {
+      actualizarFlechasGaleria();
+    }
+  });
+
+  // ── LIGHTBOX ──────────────────────────
+  let lbIndex = 0;
+  let lbOverflowPrevio = '';
+
+  function lightboxActivo() {
+    return document.getElementById('lightbox').classList.contains('activo');
+  }
+
+  function abrirLightbox(indice) {
+    if (!galeriaFotos.length) return;
+    const lb = document.getElementById('lightbox');
+    lb.classList.toggle('lightbox-single', galeriaFotos.length < 2);
+    document.getElementById('lightboxThumbs').innerHTML = galeriaFotos.map((f, i) =>
+      `<button type="button" class="lightbox-thumb" data-idx="${i}" aria-label="Ver foto ${i + 1}"><img src="${f}" alt=""></button>`).join('');
+    lbOverflowPrevio = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    lb.classList.add('activo');
+    lb.setAttribute('aria-hidden', 'false');
+    mostrarFotoLightbox(indice);
+  }
+
+  function mostrarFotoLightbox(indice) {
+    const total = galeriaFotos.length;
+    lbIndex = ((indice % total) + total) % total;
+    const img = document.getElementById('lightboxImg');
+    img.classList.add('cargando');
+    img.onload = img.onerror = () => img.classList.remove('cargando');
+    img.src = galeriaFotos[lbIndex];
+    img.alt = `Foto ${lbIndex + 1} de ${total}`;
+    document.getElementById('lightboxCounter').textContent = `${lbIndex + 1} / ${total}`;
+    document.querySelectorAll('#lightboxThumbs .lightbox-thumb').forEach((t, i) => {
+      const activa = i === lbIndex;
+      t.classList.toggle('activa', activa);
+      if (activa) t.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    });
+    // Precarga las fotos vecinas para que el cambio sea inmediato
+    [lbIndex + 1, lbIndex - 1].forEach(i => {
+      const src = galeriaFotos[(i + total) % total];
+      if (src) new Image().src = src;
+    });
+  }
+
+  function lightboxNav(direccion) {
+    mostrarFotoLightbox(lbIndex + direccion);
+  }
+
+  function cerrarLightbox() {
+    const lb = document.getElementById('lightbox');
+    lb.classList.remove('activo');
+    lb.setAttribute('aria-hidden', 'true');
+    document.getElementById('lightboxImg').removeAttribute('src');
+    document.body.style.overflow = lbOverflowPrevio;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightboxActivo()) return;
+    if (e.key === 'Escape')          { e.stopPropagation(); cerrarLightbox(); }
+    else if (e.key === 'ArrowLeft')  lightboxNav(-1);
+    else if (e.key === 'ArrowRight') lightboxNav(1);
+  });
+
+  document.getElementById('lightboxThumbs').addEventListener('click', (e) => {
+    const t = e.target.closest('.lightbox-thumb');
+    if (t) mostrarFotoLightbox(Number(t.dataset.idx));
+  });
+
+  // Clic en el fondo (fuera de la foto) cierra; swipe horizontal cambia de foto
+  const lbStage = document.getElementById('lightboxStage');
+  lbStage.addEventListener('click', (e) => {
+    if (e.target === lbStage) cerrarLightbox();
+  });
+  let lbTouchX = 0, lbTouchY = 0;
+  lbStage.addEventListener('touchstart', (e) => {
+    lbTouchX = e.changedTouches[0].clientX;
+    lbTouchY = e.changedTouches[0].clientY;
+  }, { passive: true });
+  lbStage.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - lbTouchX;
+    const dy = e.changedTouches[0].clientY - lbTouchY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) lightboxNav(dx < 0 ? 1 : -1);
+  }, { passive: true });
 
   async function abrirPerfil(card) {
     const p = proveedoresCache.find(x => x.id === card.dataset.id);
@@ -583,6 +702,7 @@
     seleccionarEstrella(0);
 
     document.getElementById('perfilOverlay').classList.add('activo');
+    actualizarFlechasGaleria();
 
     const reviewsEl = document.getElementById('perfilReviews');
     reviewsEl.innerHTML = '<p class="perfil-empty-reviews">Cargando reseñas…</p>';
@@ -671,6 +791,9 @@
   window.seleccionarEstrella = seleccionarEstrella;
   window.enviarResenaClick   = enviarResenaClick;
   window.scrollGaleria       = scrollGaleria;
+  window.abrirLightbox       = abrirLightbox;
+  window.cerrarLightbox      = cerrarLightbox;
+  window.lightboxNav         = lightboxNav;
 
   // ── MENU MÓVIL ──────────────────────
   // ── BÚSQUEDA HERO ───────────────────

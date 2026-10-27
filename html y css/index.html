@@ -40,8 +40,9 @@
 <!-- MODAL SELECCIÓN DE CIUDAD -->
 <div class="ciudad-modal-overlay" id="ciudadModalOverlay" onclick="cerrarModalCiudadSiFondo(event)">
   <div class="ciudad-modal-box">
-    <h3>¿En qué ciudad estás?</h3>
-    <p>Te mostraremos los proveedores disponibles en tu ciudad.</p>
+    <button class="ciudad-modal-volver" id="ciudadModalVolver" onclick="volverAEstados()" style="display:none;">← Volver a estados</button>
+    <h3 id="ciudadModalTitulo">¿En qué estado estás?</h3>
+    <p id="ciudadModalSubtitulo">Te mostraremos los proveedores disponibles en tu ciudad.</p>
     <div class="ciudad-modal-lista" id="ciudadModalLista"></div>
   </div>
 </div>
@@ -338,7 +339,7 @@
 </div>
 
 <script type="module">
-  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion, CIUDADES_DISPONIBLES, obtenerCiudadActual, guardarCiudadActual } from './firebase.js';
+  import { cargarHorarios, cargarProveedores, cargarResenas, enviarResena, guardarReservacion, ENTIDAD_POR_CIUDAD_LEGADO, cargarUbicaciones, obtenerUbicacionActual, guardarUbicacionActual } from './firebase.js';
 
   const WHATSAPP_NUM = 'TUNUMERO';
  
@@ -368,16 +369,20 @@
   };
 
   async function renderProveedoresIndex() {
-    const ciudadActual = obtenerCiudadActual();
+    const ubicacion = obtenerUbicacionActual();
     const todos = await cargarProveedores();
-    const proveedores = todos.filter(p => (p.ciudad || 'Saltillo') === ciudadActual);
+    const proveedores = todos.filter(p => {
+      const entidadProv = p.entidad || ENTIDAD_POR_CIUDAD_LEGADO[p.ciudad] || '';
+      const ciudadProv  = p.ciudad || 'Saltillo';
+      return ciudadProv === ubicacion.ciudad && (entidadProv === ubicacion.entidad || !entidadProv);
+    });
     proveedores.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     proveedoresCache = proveedores;
     const grid = document.getElementById('providersGrid');
     document.getElementById('indexLoading').remove();
 
     if (proveedores.length === 0) {
-      grid.innerHTML = `<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>Todavía no hay proveedores disponibles en ${ciudadActual}.</div>`;
+      grid.innerHTML = `<div class="prov-empty" style="grid-column:1/-1"><span>😔</span>Todavía no hay proveedores disponibles en ${ubicacion.ciudad}.</div>`;
       return;
     }
 
@@ -426,25 +431,67 @@
 
   renderProveedoresIndex();
 
-  // ── SELECTOR DE CIUDAD ─────────────────
+  // ── SELECTOR DE ESTADO/CIUDAD ─────────────────
   function actualizarTextoCiudadNav() {
-    const ciudad = obtenerCiudadActual();
-    document.getElementById('ciudadNavTexto').textContent       = ciudad;
-    document.getElementById('ciudadNavTextoMobile').textContent = ciudad;
+    const ubicacion = obtenerUbicacionActual();
+    document.getElementById('ciudadNavTexto').textContent       = ubicacion.ciudad;
+    document.getElementById('ciudadNavTextoMobile').textContent = ubicacion.ciudad;
   }
 
-  function abrirModalCiudad() {
+  let mapaUbicacionesModal = {};
+
+  async function abrirModalCiudad() {
     const lista = document.getElementById('ciudadModalLista');
-    const actual = obtenerCiudadActual();
-    lista.innerHTML = CIUDADES_DISPONIBLES.map(c => `
-      <button class="ciudad-modal-opcion ${c === actual ? 'seleccionada' : ''}" data-ciudad="${c}">
-        📍 ${c} ${c === actual ? '✓' : ''}
+    lista.innerHTML = '<p class="perfil-empty-reviews">Cargando…</p>';
+    document.getElementById('ciudadModalOverlay').classList.add('activo');
+    mapaUbicacionesModal = await cargarUbicaciones();
+    mostrarPasoEstados();
+  }
+
+  function mostrarPasoEstados() {
+    document.getElementById('ciudadModalTitulo').textContent    = '¿En qué estado estás?';
+    document.getElementById('ciudadModalSubtitulo').textContent = 'Elige tu estado para ver las ciudades disponibles.';
+    document.getElementById('ciudadModalVolver').style.display  = 'none';
+
+    const entidades = Object.keys(mapaUbicacionesModal).filter(e => mapaUbicacionesModal[e] && mapaUbicacionesModal[e].length > 0);
+    const lista = document.getElementById('ciudadModalLista');
+
+    if (entidades.length === 0) {
+      lista.innerHTML = '<p class="perfil-empty-reviews">Todavía no hay ciudades disponibles.</p>';
+      return;
+    }
+
+    const actual = obtenerUbicacionActual();
+    lista.innerHTML = entidades.map(e => `
+      <button class="ciudad-modal-opcion ${e === actual.entidad ? 'seleccionada' : ''}" data-entidad="${e}">
+        ${e} ${e === actual.entidad ? '✓' : ''}
       </button>
     `).join('');
     lista.querySelectorAll('.ciudad-modal-opcion').forEach(btn => {
-      btn.addEventListener('click', () => seleccionarCiudad(btn.dataset.ciudad));
+      btn.addEventListener('click', () => mostrarPasoCiudades(btn.dataset.entidad));
     });
-    document.getElementById('ciudadModalOverlay').classList.add('activo');
+  }
+
+  function mostrarPasoCiudades(entidad) {
+    document.getElementById('ciudadModalTitulo').textContent    = entidad;
+    document.getElementById('ciudadModalSubtitulo').textContent = 'Elige tu ciudad.';
+    document.getElementById('ciudadModalVolver').style.display  = 'block';
+
+    const actual   = obtenerUbicacionActual();
+    const ciudades = mapaUbicacionesModal[entidad] || [];
+    const lista = document.getElementById('ciudadModalLista');
+    lista.innerHTML = ciudades.map(c => `
+      <button class="ciudad-modal-opcion ${c === actual.ciudad ? 'seleccionada' : ''}" data-ciudad="${c}">
+        📍 ${c} ${c === actual.ciudad ? '✓' : ''}
+      </button>
+    `).join('');
+    lista.querySelectorAll('.ciudad-modal-opcion').forEach(btn => {
+      btn.addEventListener('click', () => seleccionarCiudad(entidad, btn.dataset.ciudad));
+    });
+  }
+
+  function volverAEstados() {
+    mostrarPasoEstados();
   }
 
   function cerrarModalCiudad() {
@@ -455,8 +502,8 @@
     if (e.target.id === 'ciudadModalOverlay') cerrarModalCiudad();
   }
 
-  function seleccionarCiudad(ciudad) {
-    guardarCiudadActual(ciudad);
+  function seleccionarCiudad(entidad, ciudad) {
+    guardarUbicacionActual(entidad, ciudad);
     cerrarModalCiudad();
     location.reload();
   }
@@ -464,6 +511,7 @@
   actualizarTextoCiudadNav();
   window.abrirModalCiudad          = abrirModalCiudad;
   window.cerrarModalCiudadSiFondo  = cerrarModalCiudadSiFondo;
+  window.volverAEstados            = volverAEstados;
 
   // ── PERFIL DE PROVEEDOR ───────────────
   // ── GALERÍA DEL PERFIL ────────────────

@@ -269,6 +269,12 @@
     padding: 32px 28px; max-width: 380px; width: 100%;
     box-shadow: 0 20px 60px rgba(0,0,0,.3);
   }
+  .ciudad-modal-volver {
+    background: none; border: none; cursor: pointer; padding: 0 0 10px;
+    font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 600;
+    color: var(--mid-gray);
+  }
+  .ciudad-modal-volver:hover { color: var(--black); }
   .ciudad-modal-box h3 {
     font-family: 'Fraunces', serif; font-size: 1.25rem; margin-bottom: 8px; color: var(--black);
   }
@@ -1094,6 +1100,7 @@
 .foto-slot.has-image .foto-remove { display: flex; }
 .foto-slot.has-image input[type="file"] { display: none; }
 .fotos-nota { font-size: 0.78rem; color: var(--mid-gray); margin-top: 6px; }
+.afil-horario-nota { font-size: 0.85rem; color: var(--mid-gray); margin-bottom: 14px; line-height: 1.5; }
 .fotos-error { font-size: 0.78rem; color: #E53E3E; display: none; margin-top: 4px; }
 
 /* ══════════════════════════════════════
@@ -1590,6 +1597,40 @@
   padding: 8px 12px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
   color: var(--black); background: var(--white); cursor: pointer;
 }
+
+.admin-ciudades-panel {
+  margin: 14px 32px 0; background: var(--light-gray); border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.admin-ciudades-titulo { font-size: 0.82rem; font-weight: 700; color: var(--black); margin-bottom: 10px; }
+.admin-ciudad-estado-gestion {
+  display: block; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px;
+  padding: 8px 12px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 600;
+  color: var(--black); background: var(--white); cursor: pointer; max-width: 260px;
+}
+.admin-ciudades-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.admin-ciudad-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--white); border-radius: 20px; padding: 6px 8px 6px 14px;
+  font-size: 0.82rem; font-weight: 600; color: var(--black);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.admin-ciudad-chip-x {
+  background: #f0f0f0; border: none; border-radius: 50%;
+  width: 18px; height: 18px; font-size: 0.65rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--mid-gray);
+}
+.admin-ciudad-chip-x:hover { background: #e0b0b0; color: #c0392b; }
+.admin-ciudad-add { display: flex; gap: 8px; flex-wrap: wrap; }
+.admin-ciudad-add input {
+  flex: 1; min-width: 180px; border: 1px solid #ddd; border-radius: 8px;
+  padding: 9px 12px; font-family: 'Outfit', sans-serif; font-size: 0.85rem;
+}
+.admin-ciudad-add button {
+  background: var(--black); color: var(--white); border: none; border-radius: 8px;
+  padding: 9px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.admin-ciudad-add button:hover { opacity: .85; }
 
 .admin-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
